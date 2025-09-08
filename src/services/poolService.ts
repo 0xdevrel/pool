@@ -4,7 +4,7 @@ import { ChainId } from '@uniswap/sdk-core';
 export const WORLD_CHAIN_ID = 480 as ChainId;
 export const WORLD_CHAIN_RPC = 'https://worldchain.worldcoin.org';
 
-// Pool data interface based on Uniswap v4 structure
+// Pool data interface for World Chain liquidity pools
 export interface PoolData {
   id: string;
   token0: {
@@ -40,7 +40,7 @@ export interface PoolData {
   createdAtBlockNumber: number;
 }
 
-// Mock data for World Chain v4 pools (based on the image data)
+// Mock data for World Chain pools (based on the image data)
 export const MOCK_WORLD_CHAIN_POOLS: PoolData[] = [
   {
     id: '0x1234567890abcdef1234567890abcdef12345678',
@@ -228,7 +228,7 @@ export class PoolService {
     return PoolService.instance;
   }
 
-  // Fetch pools for World Chain v4
+  // Fetch pools for World Chain
   async fetchWorldChainPools(): Promise<PoolData[]> {
     const cacheKey = 'world-chain-v4-pools';
     const now = Date.now();
@@ -240,7 +240,7 @@ export class PoolService {
 
     try {
       // For now, return mock data
-      // In production, this would fetch from Uniswap v4 subgraph or direct contract calls
+      // In production, this would fetch from World Chain subgraph or direct contract calls
       const pools = MOCK_WORLD_CHAIN_POOLS;
       
       // Cache the results

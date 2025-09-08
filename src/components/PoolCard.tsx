@@ -29,6 +29,7 @@ export const PoolCard = ({ pool, onClick }: PoolCardProps) => {
       'WLD': '🌍',
       'USDC': '💵',
       'USDT': '💵',
+      'USD₮0': '💵',
       'WBTC': '₿',
       'uSOL': '☀️',
       'uXRP': '💎',

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Navigation } from "@/components/Navigation";
 import { portfolioService, PortfolioSummary } from "@/services/portfolioService";
 import { FaSync, FaWallet, FaChartLine } from "react-icons/fa";
+import { PageHeader } from "@/components/PageHeader";
 
 interface User {
   walletAddress: string;
@@ -77,6 +78,7 @@ export default function PortfolioPage() {
       'WLD': '🌍',
       'USDC': '💵',
       'USDT': '💵',
+      'USD₮0': '💵',
       'WBTC': '₿',
       'uSOL': '☀️',
       'uXRP': '💎',
@@ -89,10 +91,11 @@ export default function PortfolioPage() {
   if (!user) {
     return (
       <div className="portfolio-page">
-        <div className="page-header">
-          <h1>Portfolio</h1>
-          <p>Please log in to view your portfolio</p>
-        </div>
+        <PageHeader 
+          title="Portfolio" 
+          subtitle="Please log in to view your portfolio" 
+          showAvatar={false}
+        />
         <Navigation />
       </div>
     );
@@ -100,27 +103,22 @@ export default function PortfolioPage() {
 
   return (
     <div className="portfolio-page">
-      {/* Mobile-First Header */}
-      <header className="page-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1 className="page-title">Portfolio</h1>
-            <p className="page-subtitle">Your token holdings on World Chain</p>
-          </div>
-          <div className="header-right">
-            <button 
-              className="refresh-button"
-              onClick={loadPortfolio}
-              disabled={loading}
-            >
-              <FaSync className={loading ? 'spinning' : ''} />
-              Refresh
-            </button>
-          </div>
-        </div>
-      </header>
+      <PageHeader 
+        title="Portfolio" 
+        subtitle="Your token holdings on World Chain" 
+      />
       
       <div className="page-content">
+        <div className="portfolio-header-actions">
+          <button 
+            className="refresh-button"
+            onClick={loadPortfolio}
+            disabled={loading}
+          >
+            <FaSync className={loading ? 'spinning' : ''} />
+            Refresh
+          </button>
+        </div>
         {loading && (
           <div className="loading-state">
             <div className="spinner"></div>

@@ -161,7 +161,9 @@
   border: 1px solid var(--border);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-lg);
-  min-width: 200px;
+  min-width: 160px;
+  max-width: 200px;
+  width: max-content;
   z-index: 1000;
   overflow: hidden;
 }
@@ -2041,7 +2043,7 @@ body {
 
 .page-content {
   flex: 1;
-  padding: 24px 16px;
+  padding: 16px; /* Reduced padding for better mobile spacing */
 }
 
 /* Portfolio specific styles */
@@ -2049,6 +2051,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.portfolio-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
 }
 
 .portfolio-summary {
@@ -2295,6 +2303,161 @@ body {
 
 /* ===== RESPONSIVE DESIGN ===== */
 
+/* Mobile-specific user menu adjustments */
+@media (max-width: 480px) {
+  .user-menu {
+    min-width: 140px;
+    max-width: 180px;
+    right: -10px; /* Adjust position for mobile */
+  }
+  
+  .user-menu-header {
+    padding: 12px;
+  }
+  
+  .user-name {
+    font-size: 14px;
+  }
+  
+  .user-address {
+    font-size: 11px;
+  }
+  
+  .menu-action {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+  
+  /* Mobile-specific swap page optimizations */
+  .swap-page {
+    padding-bottom: 120px; /* Extra space for mobile */
+  }
+  
+  .swap-interface {
+    padding: 12px; /* Even tighter padding on mobile */
+  }
+  
+  .swap-header {
+    margin-bottom: 12px;
+  }
+  
+  .swap-header h2 {
+    font-size: 20px; /* Smaller title on mobile */
+  }
+  
+  .swap-inputs {
+    gap: 8px; /* Tighter gap on mobile */
+    margin-bottom: 12px;
+  }
+  
+  .swap-input {
+    padding: 12px; /* Reduced padding on mobile */
+  }
+  
+  .amount-input {
+    font-size: 18px; /* Smaller font on mobile */
+  }
+  
+  .swap-details {
+    padding: 10px; /* Reduced padding on mobile */
+    margin-bottom: 12px;
+  }
+  
+  .swap-actions {
+    margin-top: 8px; /* Ensure button is visible */
+  }
+  
+  .swap-button {
+    padding: 12px; /* Reduced padding on mobile */
+    font-size: 15px; /* Slightly smaller font on mobile */
+    min-height: 44px; /* Smaller button height on mobile */
+  }
+  
+  .page-content {
+    padding: 12px; /* Even tighter padding on mobile */
+  }
+  
+  /* Mobile-specific limit order optimizations */
+  .limit-order-interface {
+    padding: 12px; /* Even tighter padding on mobile */
+  }
+  
+  .limit-order-header {
+    margin-bottom: 12px;
+  }
+  
+  .limit-order-header h2 {
+    font-size: 20px; /* Smaller title on mobile */
+  }
+  
+  .popular-pairs {
+    margin-bottom: 16px;
+  }
+  
+  .popular-pairs h3 {
+    font-size: 14px;
+  }
+  
+  .pair-buttons {
+    gap: 6px;
+  }
+  
+  .pair-button {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+  
+  .limit-order-inputs {
+    gap: 8px; /* Tighter gap on mobile */
+    margin-bottom: 12px;
+  }
+  
+  .limit-order-settings {
+    padding: 12px; /* Reduced padding on mobile */
+    margin-bottom: 12px;
+  }
+  
+  .limit-order-details {
+    padding: 10px; /* Reduced padding on mobile */
+    margin-bottom: 12px;
+  }
+  
+  .expiry-section {
+    gap: 8px; /* Tighter gap on mobile */
+  }
+  
+  .expiry-label {
+    font-size: 13px; /* Smaller label on mobile */
+  }
+  
+  .expiry-buttons {
+    gap: 4px; /* Tighter gap on mobile */
+    flex-wrap: nowrap; /* Maintain single line on mobile */
+  }
+  
+  .expiry-button {
+    padding: 6px 8px; /* Smaller buttons on mobile */
+    font-size: 10px; /* Smaller font for mobile */
+    flex: 1; /* Maintain equal width on mobile */
+  }
+  
+  .limit-order-actions {
+    margin-top: 8px; /* Ensure button is visible */
+  }
+  
+  .price-suggestions {
+    gap: 4px; /* Tighter gap on mobile */
+    margin-top: 8px;
+    flex-wrap: nowrap; /* Maintain single line on mobile */
+  }
+  
+  .price-suggestion-button {
+    padding: 4px 6px; /* Smaller buttons on mobile */
+    font-size: 9px; /* Smaller font for mobile */
+    flex: 1; /* Maintain equal width on mobile */
+  }
+}
+
 @media (min-width: 768px) {
   .nav-container {
     max-width: 600px;
@@ -2334,7 +2497,7 @@ body {
   display: flex;
   flex-direction: column;
   background: var(--background);
-  padding-bottom: 80px;
+  padding-bottom: 100px; /* Increased to ensure button visibility */
 }
 
 .swap-tabs {
@@ -2371,14 +2534,14 @@ body {
 .swap-interface {
   max-width: 500px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 16px; /* Reduced padding for better mobile spacing */
 }
 
 .swap-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px; /* Reduced margin for tighter spacing */
 }
 
 .swap-header h2 {
@@ -2408,8 +2571,8 @@ body {
   background: var(--accent-soft);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-lg);
-  padding: 20px;
-  margin-bottom: 24px;
+  padding: 16px; /* Reduced padding */
+  margin-bottom: 16px; /* Reduced margin */
 }
 
 .setting-item {
@@ -2503,22 +2666,22 @@ body {
 .swap-inputs {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px; /* Reduced gap for tighter spacing */
+  margin-bottom: 16px; /* Reduced margin */
 }
 
 .swap-arrow-container {
   display: flex;
   justify-content: center;
-  margin: -8px 0;
+  margin: -6px 0; /* Reduced margin for tighter spacing */
 }
 
 .swap-arrow-button {
   background: var(--background);
   border: 2px solid var(--border);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 36px; /* Slightly smaller for better mobile fit */
+  height: 36px; /* Slightly smaller for better mobile fit */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2543,8 +2706,8 @@ body {
   background: var(--accent-soft);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-lg);
-  padding: 16px;
-  margin-bottom: 24px;
+  padding: 12px; /* Reduced padding */
+  margin-bottom: 16px; /* Reduced margin */
 }
 
 .detail-row {
@@ -2578,7 +2741,7 @@ body {
 
 .swap-button {
   width: 100%;
-  padding: 16px;
+  padding: 14px; /* Slightly reduced padding */
   border: none;
   border-radius: var(--border-radius-lg);
   font-size: 16px;
@@ -2588,6 +2751,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 48px; /* Ensure consistent button height */
 }
 
 .swap-button.enabled {
@@ -2618,14 +2782,14 @@ body {
   background: var(--background);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-lg);
-  padding: 20px;
+  padding: 16px; /* Reduced padding for better mobile spacing */
 }
 
 .input-label {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px; /* Reduced margin */
 }
 
 .input-label span {
@@ -2671,11 +2835,11 @@ body {
   background: none;
   border: none;
   color: var(--foreground);
-  font-size: 24px;
+  font-size: 20px; /* Reduced font size for better mobile fit */
   font-weight: 600;
   outline: none;
   padding: 0;
-  margin-bottom: 4px;
+  margin-bottom: 2px; /* Reduced margin */
 }
 
 .amount-input::placeholder {
@@ -2691,7 +2855,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 4px; /* Reduced gap */
 }
 
 .token-balance {
@@ -2921,12 +3085,12 @@ body {
 .limit-order-interface {
   max-width: 500px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 16px; /* Reduced padding for better mobile spacing */
 }
 
 .limit-order-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px; /* Reduced margin for tighter spacing */
 }
 
 .limit-order-header h2 {
@@ -2942,11 +3106,51 @@ body {
   margin: 0;
 }
 
+.popular-pairs {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.popular-pairs h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 12px 0;
+}
+
+.pair-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pair-button {
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 8px 16px;
+  border-radius: var(--border-radius);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pair-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.pair-tokens {
+  font-weight: 600;
+}
+
 .limit-order-inputs {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px; /* Reduced gap for tighter spacing */
+  margin-bottom: 16px; /* Reduced margin */
 }
 
 .limit-price-input {
@@ -2961,12 +3165,46 @@ body {
   color: var(--secondary);
 }
 
+.price-suggestions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap; /* Keep all buttons in a single line */
+  justify-content: space-between; /* Distribute buttons evenly */
+  margin-top: 12px;
+}
+
+.price-suggestion-button {
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 6px 10px;
+  border-radius: var(--border-radius);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex: 1; /* Make buttons equal width for symmetry */
+  text-align: center;
+}
+
+.price-suggestion-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.price-suggestion-button.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
 .limit-order-settings {
   background: var(--accent-soft);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-lg);
-  padding: 20px;
-  margin-bottom: 24px;
+  padding: 16px; /* Reduced padding */
+  margin-bottom: 16px; /* Reduced margin */
 }
 
 .setting-icon {
@@ -2996,12 +3234,60 @@ body {
   color: var(--secondary);
 }
 
+.expiry-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.expiry-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.expiry-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap; /* Keep all buttons in a single line */
+  justify-content: space-between; /* Distribute buttons evenly */
+}
+
+.expiry-button {
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex: 1; /* Make buttons equal width for symmetry */
+  text-align: center;
+}
+
+.expiry-button:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.expiry-button.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
 .limit-order-details {
   background: var(--accent-soft);
   border: 1px solid var(--border);
   border-radius: var(--border-radius-lg);
-  padding: 16px;
-  margin-bottom: 24px;
+  padding: 12px; /* Reduced padding */
+  margin-bottom: 16px; /* Reduced margin */
 }
 
 .limit-order-actions {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Token } from "@uniswap/sdk-core";
 import { SwapInput } from "./SwapInput";
 import { swapService } from "@/services/swapService";
+import { AVAILABLE_TOKENS } from "@/constants/tokens";
 import { FaExchangeAlt, FaCalendarAlt } from "react-icons/fa";
 
 interface LimitOrderInterfaceProps {
@@ -18,6 +19,31 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
   const [limitPrice, setLimitPrice] = useState<string>("");
   const [expiry, setExpiry] = useState<number>(7); // days
   const [creating, setCreating] = useState(false);
+
+  const expiryOptions = [
+    { label: "1 day", value: 1 },
+    { label: "1 week", value: 7 },
+    { label: "1 month", value: 30 },
+    { label: "1 year", value: 365 }
+  ];
+
+  const priceSuggestions = [
+    { label: "Market", value: 0 },
+    { label: "+1%", value: 1.01 },
+    { label: "+5%", value: 1.05 },
+    { label: "+10%", value: 1.10 }
+  ];
+
+  const popularPairs = [
+    { tokenIn: AVAILABLE_TOKENS[0], tokenOut: AVAILABLE_TOKENS[1] }, // ETH/USDC
+    { tokenIn: AVAILABLE_TOKENS[0], tokenOut: AVAILABLE_TOKENS[2] }, // ETH/WLD
+    { tokenIn: AVAILABLE_TOKENS[1], tokenOut: AVAILABLE_TOKENS[2] }, // USDC/WLD
+  ];
+
+  const handlePairSelect = (pair: { tokenIn: Token; tokenOut: Token }) => {
+    setTokenIn(pair.tokenIn);
+    setTokenOut(pair.tokenOut);
+  };
 
   const handleSwapTokens = () => {
     const tempToken = tokenIn;
@@ -59,6 +85,25 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
         <h2>Limit Order</h2>
         <p>Set a specific price for your trade</p>
       </div>
+
+      {!tokenIn || !tokenOut ? (
+        <div className="popular-pairs">
+          <h3>Popular Pairs</h3>
+          <div className="pair-buttons">
+            {popularPairs.map((pair, index) => (
+              <button
+                key={index}
+                className="pair-button"
+                onClick={() => handlePairSelect(pair)}
+              >
+                <span className="pair-tokens">
+                  {pair.tokenIn.symbol}/{pair.tokenOut.symbol}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div className="limit-order-inputs">
         <SwapInput
@@ -103,25 +148,47 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
               </div>
             </div>
           </div>
+          {tokenIn && tokenOut && (
+            <div className="price-suggestions">
+              {priceSuggestions.map((suggestion) => (
+                <button
+                  key={suggestion.label}
+                  className={`price-suggestion-button ${limitPrice === suggestion.value.toString() ? 'active' : ''}`}
+                  onClick={() => {
+                    if (suggestion.value === 0) {
+                      // Market price - you could fetch current price here
+                      setLimitPrice("0");
+                    } else {
+                      // Apply percentage to current market price
+                      // For now, just set the multiplier
+                      setLimitPrice(suggestion.value.toString());
+                    }
+                  }}
+                >
+                  {suggestion.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="limit-order-settings">
-        <div className="setting-item">
-          <label>
+        <div className="expiry-section">
+          <div className="expiry-label">
             <FaCalendarAlt className="setting-icon" />
-            <span>Order Expiry</span>
-          </label>
-          <div className="expiry-controls">
-            <input
-              type="number"
-              value={expiry}
-              onChange={(e) => setExpiry(parseInt(e.target.value) || 7)}
-              className="expiry-input"
-              min="1"
-              max="30"
-            />
-            <span className="expiry-unit">days</span>
+            <span>Expiry</span>
+          </div>
+          <div className="expiry-buttons">
+            {expiryOptions.map((option) => (
+              <button
+                key={option.value}
+                className={`expiry-button ${expiry === option.value ? 'active' : ''}`}
+                onClick={() => setExpiry(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>

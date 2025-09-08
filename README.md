@@ -15,7 +15,7 @@ A mobile-first DeFi application for liquidity pools on World Chain, featuring pr
 - **Mobile-First Design**: Optimized for mobile devices with responsive layout
 - **Dashboard Interface**: Clean, intuitive user interface for DeFi operations
 - **iOS Scroll Bounce Prevention**: Smooth scrolling experience on iOS devices
-- **Coming Soon Features**: Uniswap V4 integration, liquidity provision, token swapping
+- **Coming Soon Features**: Advanced liquidity pool features, liquidity provision, token swapping
 
 ## How it works
 
@@ -118,7 +118,7 @@ Success response (200):
 - Ensure the app is accessible via HTTPS for World App integration
 
 ## Features in Development
-- **Uniswap V4 Integration**: Advanced liquidity pool features
+- **Advanced Pool Management**: Enhanced liquidity pool features
 - **Liquidity Provision**: Add/remove liquidity from pools
 - **Token Swapping**: Direct token exchange functionality
 - **Yield Optimization**: Automated yield farming strategies

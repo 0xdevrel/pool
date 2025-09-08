@@ -3,7 +3,7 @@ import { Token, ChainId } from '@uniswap/sdk-core';
 // World Chain ID from environment variable
 export const WORLD_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_WORLD_CHAIN_ID || '480') as ChainId;
 
-// World Chain token addresses (from Uniswap v4 interface - real tokens available)
+// World Chain token addresses (real tokens available on World Chain)
 export const TOKEN_ADDRESSES = {
   ETH: '0x4200000000000000000000000000000000000006', // World Chain ETH (WETH)
   USDC: '0x79A02482A880bCE3F13e09Da970dC34db4CD24d1', // USDC on World Chain
@@ -12,10 +12,11 @@ export const TOKEN_ADDRESSES = {
   uXRP: '0x2615a94df961278DcbC41Fb0a54fEc5f10a693aE', // XRP 
   uDOGE: '0x12E96C2BFEA6E835CF8Dd38a5834fa61Cf723736', // Dogecoin (Universal) 
   uSOL: '0x9B8Df6E244526ab5F6e6400d331DB28C8fdDdb55', // Solana (Universal) 
-  uSUI: '0xb0505e5a99abd03d94a1169e638B78EDfEd26ea4', // Sui (Universal) 
+  uSUI: '0xb0505e5a99abd03d94a1169e638B78EDfEd26ea4', // Sui (Universal)
+  USDT0: '0x102d758f688a4C1C5a80b116bD945d4455460282', // Stargate USD₮0 
 };
 
-// Token definitions (matching Uniswap v4 interface)
+// Token definitions for World Chain
 export const ETH_TOKEN = new Token(
   WORLD_CHAIN_ID,
   TOKEN_ADDRESSES.ETH,
@@ -80,7 +81,15 @@ export const uSUI_TOKEN = new Token(
   'Sui (Universal)'
 );
 
-// All available tokens (matching Uniswap v4 interface order)
+export const USDT0_TOKEN = new Token(
+  WORLD_CHAIN_ID,
+  TOKEN_ADDRESSES.USDT0,
+  6,
+  'USD₮0',
+  'Stargate USD₮0'
+);
+
+// All available tokens on World Chain
 export const AVAILABLE_TOKENS = [
   ETH_TOKEN,    // World Chain ETH
   USDC_TOKEN,   // USDC
@@ -90,6 +99,7 @@ export const AVAILABLE_TOKENS = [
   uDOGE_TOKEN,  // Dogecoin (Universal)
   uSOL_TOKEN,   // Solana (Universal)
   uSUI_TOKEN,   // Sui (Universal)
+  USDT0_TOKEN,  // Stargate USD₮0
 ];
 
 // Token icons mapping (matching the interface)
@@ -102,6 +112,7 @@ export const TOKEN_ICONS: { [key: string]: string } = {
   'uDOGE': '🐕',   // Dogecoin (Universal)
   'uSOL': '☀️',    // Solana (Universal)
   'uSUI': '💧',    // Sui (Universal)
+  'USD₮0': '💵',   // Stargate USD₮0
 };
 
 // Common pool configurations for World Chain (matching available tokens)
@@ -144,6 +155,20 @@ export const POOL_CONFIGS = [
   {
     currency0: USDC_TOKEN.address,
     currency1: uDOGE_TOKEN.address,
+    fee: 500, // 0.05%
+    tickSpacing: 10,
+    hooks: "0x0000000000000000000000000000000000000000",
+  },
+  {
+    currency0: USDC_TOKEN.address,
+    currency1: USDT0_TOKEN.address,
+    fee: 100, // 0.01%
+    tickSpacing: 1,
+    hooks: "0x0000000000000000000000000000000000000000",
+  },
+  {
+    currency0: ETH_TOKEN.address,
+    currency1: USDT0_TOKEN.address,
     fee: 500, // 0.05%
     tickSpacing: 10,
     hooks: "0x0000000000000000000000000000000000000000",

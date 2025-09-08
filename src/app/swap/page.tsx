@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { SwapInterface } from "@/components/SwapInterface";
 import { LimitOrderInterface } from "@/components/LimitOrderInterface";
+import { PageHeader } from "@/components/PageHeader";
 
 interface User {
   walletAddress: string;
@@ -26,15 +27,10 @@ export default function SwapPage() {
 
   return (
     <div className="swap-page">
-      {/* Mobile-First Header */}
-      <header className="page-header">
-        <div className="header-content">
-          <div className="header-left">
-            <h1 className="page-title">Trade</h1>
-            <p className="page-subtitle">Swap tokens and create limit orders on World Chain v4</p>
-          </div>
-        </div>
-      </header>
+      <PageHeader 
+        title="Trade" 
+        subtitle="Swap tokens and create limit orders on World Chain" 
+      />
       
       <div className="swap-tabs">
         <button 
