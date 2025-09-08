@@ -26,10 +26,15 @@ export default function SwapPage() {
 
   return (
     <div className="swap-page">
-      <div className="page-header">
-        <h1>Trade</h1>
-        <p>Swap tokens and create limit orders on World Chain v4</p>
-      </div>
+      {/* Mobile-First Header */}
+      <header className="page-header">
+        <div className="header-content">
+          <div className="header-left">
+            <h1 className="page-title">Trade</h1>
+            <p className="page-subtitle">Swap tokens and create limit orders on World Chain v4</p>
+          </div>
+        </div>
+      </header>
       
       <div className="swap-tabs">
         <button 

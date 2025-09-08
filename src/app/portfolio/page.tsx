@@ -100,18 +100,25 @@ export default function PortfolioPage() {
 
   return (
     <div className="portfolio-page">
-      <div className="page-header">
-        <h1>Portfolio</h1>
-        <p>Your token holdings on World Chain</p>
-        <button 
-          className="refresh-button"
-          onClick={loadPortfolio}
-          disabled={loading}
-        >
-          <FaSync className={loading ? 'spinning' : ''} />
-          Refresh
-        </button>
-      </div>
+      {/* Mobile-First Header */}
+      <header className="page-header">
+        <div className="header-content">
+          <div className="header-left">
+            <h1 className="page-title">Portfolio</h1>
+            <p className="page-subtitle">Your token holdings on World Chain</p>
+          </div>
+          <div className="header-right">
+            <button 
+              className="refresh-button"
+              onClick={loadPortfolio}
+              disabled={loading}
+            >
+              <FaSync className={loading ? 'spinning' : ''} />
+              Refresh
+            </button>
+          </div>
+        </div>
+      </header>
       
       <div className="page-content">
         {loading && (
@@ -129,9 +136,9 @@ export default function PortfolioPage() {
         )}
 
         {portfolio && !loading && (
-          <>
+          <div className="portfolio-content">
             {/* Portfolio Summary */}
-            <div className="portfolio-summary">
+            <section className="portfolio-summary">
               <div className="summary-card">
                 <div className="summary-icon">
                   <FaWallet />
@@ -144,12 +151,18 @@ export default function PortfolioPage() {
                   </span>
                 </div>
               </div>
-            </div>
+            </section>
 
             {/* Token Holdings */}
-            <div className="token-holdings">
-              <h2>Token Holdings</h2>
-              <div className="holdings-list">
+            <section className="token-holdings">
+              <div className="section-header">
+                <h2 className="section-title">Token Holdings</h2>
+                <span className="holdings-count">
+                  {portfolio.tokenBalances.filter(tb => parseFloat(tb.balance) > 0).length} tokens
+                </span>
+              </div>
+              
+              <div className="holdings-grid">
                 {portfolio.tokenBalances
                   .filter(tokenBalance => parseFloat(tokenBalance.balance) > 0)
                   .sort((a, b) => b.usdValue - a.usdValue)
@@ -160,8 +173,8 @@ export default function PortfolioPage() {
                           {getTokenIcon(tokenBalance.token.symbol || '')}
                         </span>
                         <div className="token-details">
-                          <h4>{tokenBalance.token.symbol}</h4>
-                          <p>{tokenBalance.token.name}</p>
+                          <h4 className="token-symbol">{tokenBalance.token.symbol}</h4>
+                          <p className="token-name">{tokenBalance.token.name}</p>
                         </div>
                       </div>
                       <div className="token-balance">
@@ -184,8 +197,8 @@ export default function PortfolioPage() {
                   <p>Start by swapping tokens or adding liquidity to pools.</p>
                 </div>
               )}
-            </div>
-          </>
+            </section>
+          </div>
         )}
       </div>
       

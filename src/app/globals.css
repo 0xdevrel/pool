@@ -1981,11 +1981,51 @@ body {
 }
 
 .page-header {
-  padding: 24px 16px 16px;
-  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--background);
   border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
+.page-header .header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+}
+
+.page-header .header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.page-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+  line-height: 1;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: var(--secondary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Legacy support for old page-header structure */
 .page-header h1 {
   font-size: 28px;
   font-weight: 700;
@@ -2002,6 +2042,172 @@ body {
 .page-content {
   flex: 1;
   padding: 24px 16px;
+}
+
+/* Portfolio specific styles */
+.portfolio-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.portfolio-summary {
+  width: 100%;
+}
+
+.summary-card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--accent-soft);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 20px;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--secondary);
+  margin: 0 0 8px 0;
+}
+
+.total-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 4px 0;
+  line-height: 1;
+}
+
+.last-updated {
+  font-size: 12px;
+  color: var(--secondary-light);
+}
+
+/* Token Holdings */
+.token-holdings {
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.holdings-count {
+  font-size: 14px;
+  color: var(--secondary);
+  background: var(--border);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.holdings-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.holding-card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.holding-card:hover {
+  border-color: var(--border-dark);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.token-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.token-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-soft);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.token-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.token-symbol {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+  line-height: 1;
+}
+
+.token-name {
+  font-size: 14px;
+  color: var(--secondary);
+  margin: 0;
+  line-height: 1;
+}
+
+.token-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.balance-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+  line-height: 1;
+}
+
+.balance-usd {
+  font-size: 14px;
+  color: var(--secondary);
+  margin: 0;
+  line-height: 1;
 }
 
 /* ===== DASHBOARD UPDATES ===== */
