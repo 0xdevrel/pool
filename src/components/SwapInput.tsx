@@ -35,7 +35,11 @@ export const SwapInput = ({
         try {
           const price = await portfolioService.getTokenPrice(token);
           const value = parseFloat(amount) * price;
-          setUsdValue(`$${value.toFixed(2)}`);
+          if (value > 0) {
+            setUsdValue(`$${value.toFixed(2)}`);
+          } else {
+            setUsdValue("$0");
+          }
         } catch (error) {
           console.error('Error fetching token price:', error);
           setUsdValue("$0");
@@ -84,6 +88,12 @@ export const SwapInput = ({
     const num = parseFloat(balance);
     if (num === 0) return '0';
     if (num < 0.000001) return '<0.000001';
+    
+    // For very small amounts, show more precision
+    if (num < 0.01) {
+      return num.toFixed(8).replace(/\.?0+$/, '');
+    }
+    // For larger amounts, show up to 6 decimal places
     return num.toFixed(6).replace(/\.?0+$/, '');
   };
 

@@ -28,7 +28,7 @@ export interface PortfolioSummary {
 class PortfolioService {
   private provider: ethers.JsonRpcProvider | null = null;
   private cache: Map<string, { data: PortfolioSummary; timestamp: number }> = new Map();
-  private readonly CACHE_DURATION = 30000; // 30 seconds
+  private readonly CACHE_DURATION = 2 * 60 * 1000; // 2 minutes to match price API cache
 
   constructor() {
     this.initializeProvider();
@@ -54,17 +54,20 @@ class PortfolioService {
   // Get token balance for a specific address
   async getTokenBalance(token: Token, userAddress: string): Promise<string> {
     if (!this.provider) {
-      console.warn('Provider not initialized, returning mock balance');
-      return this.getMockBalance(token);
+      console.warn('Provider not initialized, returning zero balance');
+      return '0';
     }
 
     try {
       const contract = new ethers.Contract(token.address, ERC20_ABI, this.provider);
       const balance = await contract.balanceOf(userAddress);
-      return balance.toString();
+      
+      // Convert from wei/smallest unit to human readable format using token decimals
+      const formattedBalance = ethers.formatUnits(balance, token.decimals);
+      return formattedBalance;
     } catch (error) {
       console.error(`Error fetching balance for ${token.symbol}:`, error);
-      return this.getMockBalance(token);
+      return '0';
     }
   }
 
@@ -78,24 +81,36 @@ class PortfolioService {
     }
 
     if (!this.provider) {
-      console.warn('Provider not initialized, returning mock portfolio');
-      return this.getMockPortfolio(userAddress);
+      console.warn('Provider not initialized, returning empty portfolio');
+      return {
+        totalValueUSD: 0,
+        tokenBalances: [],
+        lastUpdated: new Date(),
+      };
     }
 
     try {
       const tokenBalances: TokenBalance[] = [];
       let totalValueUSD = 0;
 
+      // Fetch all prices at once for better performance
+      const prices = await this.getTokenPrices(AVAILABLE_TOKENS);
+
       // Fetch balances for all available tokens in parallel
       const balancePromises = AVAILABLE_TOKENS.map(async (token) => {
         try {
           const balance = await this.getTokenBalance(token, userAddress);
           const balanceFormatted = this.formatTokenAmount(balance);
-          const usdValue = await this.getTokenUSDValue(token, balance);
+          
+          // Use pre-fetched price data
+          const priceData = prices[token.symbol || ''];
+          const price = priceData?.usd || 0;
+          const balanceNum = parseFloat(balance);
+          const usdValue = balanceNum * price;
           
           return {
             token,
-            balance,
+            balance: balanceFormatted, // Store the formatted balance
             balanceFormatted,
             usdValue,
           };
@@ -130,29 +145,19 @@ class PortfolioService {
       return portfolio;
     } catch (error) {
       console.error('Error fetching portfolio:', error);
-      return this.getMockPortfolio(userAddress);
+      return {
+        totalValueUSD: 0,
+        tokenBalances: [],
+        lastUpdated: new Date(),
+      };
     }
   }
 
   // Get USD value of a token amount
   private async getTokenUSDValue(token: Token, balance: string): Promise<number> {
     try {
-      // In production, you would fetch real prices from a price API
-      // For now, using mock prices
-      const mockPrices: { [key: string]: number } = {
-        'WETH': 2500,
-        'WLD': 2.5,
-        'USDC': 1.0,
-        'USDT': 1.0,
-        'WBTC': 45000,
-        'uSOL': 200,
-        'uXRP': 0.5,
-        'uDOGE': 0.08,
-        'uSUI': 1.5,
-      };
-
-      const price = mockPrices[token.symbol || ''] || 0;
-      const balanceNum = parseFloat(this.formatTokenAmount(balance));
+      const price = await this.getTokenPrice(token);
+      const balanceNum = parseFloat(balance); // balance is already formatted
       return balanceNum * price;
     } catch (error) {
       console.error('Error calculating USD value:', error);
@@ -160,67 +165,20 @@ class PortfolioService {
     }
   }
 
-  // Format token amount based on decimals
+  // Format token amount for display (balance is already converted from wei)
   private formatTokenAmount(amount: string): string {
     const num = parseFloat(amount);
     if (num === 0) return '0';
     if (num < 0.000001) return '<0.000001';
+    
+    // For very small amounts, show more precision
+    if (num < 0.01) {
+      return num.toFixed(8).replace(/\.?0+$/, '');
+    }
+    // For larger amounts, show up to 6 decimal places
     return num.toFixed(6).replace(/\.?0+$/, '');
   }
 
-  // Mock balance for fallback
-  private getMockBalance(token: Token): string {
-    const mockBalances: { [key: string]: string } = {
-      'ETH': '0.5',      // World Chain ETH
-      'USDC': '1000',    // USDC
-      'WLD': '100',      // Worldcoin
-      'WBTC': '0.01',    // Wrapped BTC
-      'uXRP': '1000',    // XRP (Universal)
-      'uDOGE': '50000',  // Dogecoin (Universal)
-      'uSOL': '10',      // Solana (Universal)
-      'uSUI': '100',     // Sui (Universal)
-    };
-
-    return mockBalances[token.symbol || ''] || '0';
-  }
-
-  // Mock portfolio for fallback
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private getMockPortfolio(userAddress: string): PortfolioSummary {
-    const tokenBalances: TokenBalance[] = AVAILABLE_TOKENS.map(token => {
-      const balance = this.getMockBalance(token);
-      const balanceFormatted = this.formatTokenAmount(balance);
-      // Use synchronous mock price calculation (matching Uniswap v4 interface prices)
-      const mockPrices: { [key: string]: number } = {
-        'ETH': 3668.69,   // World Chain ETH
-        'USDC': 1.00,     // USDC
-        'WLD': 0.986,     // Worldcoin
-        'WBTC': 114906.53, // Wrapped BTC
-        'uXRP': 3.04,     // XRP (Universal)
-        'uDOGE': 0.206,   // Dogecoin (Universal)
-        'uSOL': 165.43,   // Solana (Universal)
-        'uSUI': 3.51,     // Sui (Universal)
-      };
-      const price = mockPrices[token.symbol || ''] || 0;
-      const balanceNum = parseFloat(balanceFormatted);
-      const usdValue = balanceNum * price;
-
-      return {
-        token,
-        balance,
-        balanceFormatted,
-        usdValue,
-      };
-    });
-
-    const totalValueUSD = tokenBalances.reduce((sum, tb) => sum + tb.usdValue, 0);
-
-    return {
-      totalValueUSD,
-      tokenBalances,
-      lastUpdated: new Date(),
-    };
-  }
 
   // Clear cache
   clearCache(): void {
@@ -233,26 +191,47 @@ class PortfolioService {
     return this.formatTokenAmount(balance);
   }
 
-  // Get token price in USD
+  // Get token price in USD from our price API
   async getTokenPrice(token: Token): Promise<number> {
     try {
-      // In production, you would fetch real prices from a price API
-      // For now, using mock prices matching Uniswap v4 interface
-      const mockPrices: { [key: string]: number } = {
-        'ETH': 3668.69,   // World Chain ETH
-        'USDC': 1.00,     // USDC
-        'WLD': 0.986,     // Worldcoin
-        'WBTC': 114906.53, // Wrapped BTC
-        'uXRP': 3.04,     // XRP (Universal)
-        'uDOGE': 0.206,   // Dogecoin (Universal)
-        'uSOL': 165.43,   // Solana (Universal)
-        'uSUI': 3.51,     // Sui (Universal)
-      };
-
-      return mockPrices[token.symbol || ''] || 0;
+      const response = await fetch(`/api/prices?tokens=${token.symbol}`);
+      if (!response.ok) {
+        console.warn(`Failed to fetch price for ${token.symbol}`);
+        return 0;
+      }
+      
+      const data = await response.json();
+      if (data.success && data.prices[token.symbol]) {
+        return data.prices[token.symbol].usd;
+      }
+      
+      console.warn(`No price data found for ${token.symbol}`);
+      return 0;
     } catch (error) {
       console.error('Error getting token price:', error);
       return 0;
+    }
+  }
+
+  // Get multiple token prices at once for better performance
+  async getTokenPrices(tokens: Token[]): Promise<{ [symbol: string]: number }> {
+    try {
+      const symbols = tokens.map(t => t.symbol).filter(Boolean);
+      const response = await fetch(`/api/prices?tokens=${symbols.join(',')}`);
+      if (!response.ok) {
+        console.warn('Failed to fetch prices for multiple tokens');
+        return {};
+      }
+      
+      const data = await response.json();
+      if (data.success && data.prices) {
+        return data.prices;
+      }
+      
+      return {};
+    } catch (error) {
+      console.error('Error getting token prices:', error);
+      return {};
     }
   }
 }
