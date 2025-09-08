@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Terms of Use — Sudoku",
-  description: "Terms governing the use of the Sudoku app gated by World ID.",
+  title: "Terms of Use — Pool",
+  description: "Terms governing the use of the Pool app gated by World ID.",
 };
 
 export default function TermsPage() {
@@ -15,7 +15,7 @@ export default function TermsPage() {
       <section className="content-section">
         <h2 className="content-subtitle">Acceptance of Terms</h2>
         <p>
-          By accessing or using this Sudoku app, you agree to be bound by these Terms of Use. If you
+          By accessing or using this Pool app, you agree to be bound by these Terms of Use. If you
           do not agree, do not use the app.
         </p>
       </section>
@@ -34,15 +34,16 @@ export default function TermsPage() {
           <li>You may use the app for personal, non-commercial purposes.</li>
           <li>Do not attempt to bypass verification, disrupt services, or reverse engineer the app.</li>
           <li>We may modify or discontinue features at any time without notice.</li>
+          <li>Liquidity pool features are subject to additional terms and risks.</li>
         </ul>
       </section>
 
       <section className="content-section">
         <h2 className="content-subtitle">Disclaimers</h2>
         <p>
-          The app is provided on an “as is” and “as available” basis without warranties of any kind.
-          We do not warrant uninterrupted operation, accuracy of puzzle generation, or compatibility
-          with all devices.
+          The app is provided on an &quot;as is&quot; and &quot;as available&quot; basis without warranties of any kind.
+          We do not warrant uninterrupted operation, accuracy of pool data, or compatibility
+          with all devices. Liquidity pool investments carry financial risks.
         </p>
       </section>
 

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Sudoku",
-  description: "Privacy practices for the Sudoku app gated by World ID.",
+  title: "Privacy Policy — Pool",
+  description: "Privacy practices for the Pool app gated by World ID.",
 };
 
 export default function PrivacyPage() {
@@ -15,7 +15,7 @@ export default function PrivacyPage() {
       <section className="content-section">
         <h2 className="content-subtitle">Overview</h2>
         <p>
-          This Sudoku app uses World ID verification via Worldcoin MiniKit to unlock gameplay. We
+          This Pool app uses World ID verification via Worldcoin MiniKit to access liquidity pool features. We
           aim to minimize data collection and handle verification in a privacy-preserving manner.
         </p>
       </section>
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
       <section className="content-section">
         <h2 className="content-subtitle">Use of Information</h2>
         <p>
-          Verification results are used only to determine whether to unlock the game for the current
+          Verification results are used only to determine whether to unlock pool access for the current
           session. We do not build profiles or perform analytics on verification data.
         </p>
       </section>

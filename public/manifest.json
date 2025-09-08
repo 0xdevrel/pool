@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Sudoku Challenge - World App",
-  "short_name": "Sudoku",
-  "description": "A tasteful, mobile-first Sudoku with World ID verification",
+  "name": "Pool - World App",
+  "short_name": "Pool",
+  "description": "Liquidity Pools of World chain",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -10,19 +10,13 @@
   "background_color": "#ffffff",
   "icons": [
     {
-      "src": "/sudoku.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
       "src": "/globe.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
     }
   ],
-  "categories": ["games", "puzzle", "entertainment"]
+  "categories": ["finance", "defi", "liquidity"]
 }
 
 

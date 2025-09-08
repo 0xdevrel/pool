@@ -6,15 +6,14 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Sudoku Challenge - World App",
-  description: "A tasteful, mobile-first Sudoku with World ID verification",
+  title: "Pool - World App",
+  description: "Liquidity Pools of World chain",
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/sudoku.png", type: "image/png" },
       { url: "/globe.svg", type: "image/svg+xml" }
     ],
-    apple: { url: "/sudoku.png", type: "image/png" }
+    apple: { url: "/globe.svg", type: "image/svg+xml" }
   }
 };
 
