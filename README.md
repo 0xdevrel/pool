@@ -1,57 +1,59 @@
-## Sudoku (World ID gated)
+## Pool - Liquidity Pools of World Chain
 
-Minimal, mobile-first Sudoku that unlocks after a privacy-preserving World ID verification in World App (via Worldcoin MiniKit).
+A mobile-first DeFi application for liquidity pools on World Chain, featuring privacy-preserving authentication via World ID in World App.
 
 ### Tech stack
 - **Next.js App Router** (15)
 - **React** 19
 - **Tailwind CSS** 4 (custom CSS in `src/app/globals.css`)
 - **Worldcoin MiniKit** (`@worldcoin/minikit-js`, `@worldcoin/minikit-react`)
+- **React Icons** for UI elements
 
 ### Features
-- **World ID gate**: Users must verify in World App to start
-- **Fresh puzzle** after successful verification
-- **Three difficulties**: easy, medium, hard
-- **Smart highlighting**: row/column/box of selected cell
-- **Live validation** with error highlights
-- **Timer, 3-mistake limit, 3-hint limit** with game over state
-- **Mobile-first UI**
+- **World ID Authentication**: Privacy-preserving wallet authentication via World App
+- **Username Display**: Shows usernames instead of wallet addresses
+- **Mobile-First Design**: Optimized for mobile devices with responsive layout
+- **Dashboard Interface**: Clean, intuitive user interface for DeFi operations
+- **iOS Scroll Bounce Prevention**: Smooth scrolling experience on iOS devices
+- **Coming Soon Features**: Uniswap V4 integration, liquidity provision, token swapping
 
 ## How it works
 
-### Verification flow
-1. Client renders `VerifyButton` which calls `MiniKit.commandsAsync.verify` with `VerificationLevel.Orb`.
-2. The returned proof (`ISuccessResult`) is POSTed to `POST /api/verify`.
-3. The server verifies via `verifyCloudProof(payload, app_id, action, signal)` using your `app_id`.
-4. On success (or when `max_verifications_reached` is returned), the app unlocks the game.
+### Authentication Flow
+1. User opens the app in World App
+2. `WalletAuthButton` component triggers `MiniKit.commandsAsync.walletAuth`
+3. User signs a SIWE (Sign-In with Ethereum) message
+4. Backend verifies the signature via `verifySiweMessage`
+5. Username is fetched using `MiniKit.getUserByAddress()`
+6. User is redirected to the dashboard
 
 Key files:
-- `src/components/VerifyButton.tsx`: Triggers verification and calls the API
-- `src/app/api/verify/route.ts`: Verifies proof server-side (CORS enabled for dev)
-- `src/providers/minikit-provider.tsx`: Installs MiniKit and guards initial render
+- `src/components/WalletAuthButton.tsx`: Handles wallet authentication flow
+- `src/app/api/nonce/route.ts`: Generates secure nonces for authentication
+- `src/app/api/complete-siwe/route.ts`: Verifies SIWE signatures server-side
+- `src/providers/minikit-provider.tsx`: Initializes MiniKit and provides loading state
 
-### Game logic
-- `src/components/SudokuGame.tsx` contains a simple generator/solver:
-  - Backtracking creates a full valid grid
-  - Cells are removed based on difficulty (40/50/60 removed)
-  - Note: uniqueness of the puzzle is not guaranteed in this simple approach
-- Validations highlight duplicates in rows, columns, and 3×3 boxes
-- 3 mistakes or 3 used hints trigger game over
+### User Experience
+- **Welcome Screen**: Features overview and authentication
+- **Dashboard**: User profile, stats, and quick actions
+- **Responsive Design**: Adapts to different screen sizes
+- **Loading States**: Smooth transitions and feedback
 
 ## Project structure (high level)
-- `src/app/page.tsx`: Landing screen, gating, and game entry
+- `src/app/page.tsx`: Welcome screen with features and authentication
+- `src/app/dashboard/page.tsx`: Main dashboard interface
 - `src/app/layout.tsx`: App shell, fonts, MiniKit provider
-- `src/app/api/verify/route.ts`: World ID proof verification endpoint
-- `src/components/`: UI and game components
-  - `SudokuGame.tsx`, `SudokuGrid.tsx`, `SudokuCell.tsx`, `NumberPad.tsx`, `VerifyButton.tsx`
-- `src/providers/minikit-provider.tsx`: MiniKit init and loading UI
-- `public/`: icons and assets (manifest optional)
+- `src/app/api/`: Authentication endpoints
+  - `nonce/route.ts`: Nonce generation
+  - `complete-siwe/route.ts`: SIWE verification
+- `src/components/`: UI components
+  - `WalletAuthButton.tsx`: Authentication component
+- `src/providers/minikit-provider.tsx`: MiniKit initialization
+- `public/`: App icons and manifest
 
 ## Prerequisites
 - Node 18+ (Node 20+ recommended)
-- A Worldcoin Developer account and a registered Mini App to obtain:
-  - **App ID**: `app_...`
-  - **Action ID**: e.g. `sudoku-game` (or your custom action)
+- A Worldcoin Developer account and a registered Mini App
 
 ## Setup
 1. Install dependencies:
@@ -60,38 +62,50 @@ Key files:
    # or
    npm install
    ```
-2. Create `.env.local` in the project root with your IDs:
-   ```bash
-   NEXT_PUBLIC_WLD_APP_ID=app_your_app_id
-   NEXT_PUBLIC_WLD_ACTION_ID=sudoku-game
-   ```
-3. Start the dev server:
+2. Start the dev server:
    ```bash
    pnpm dev
    # or
    npm run dev
    ```
-4. Open the app inside World App. If you open it in a normal browser, the Verify button will show an error: “Please open this app in World App”.
+3. Open the app inside World App. If you open it in a normal browser, the authentication will show an error: "Please open this app in World App".
 
 Tips for testing on device:
 - Expose your local server via a tunnel (e.g., `ngrok`) and open that URL in World App
-- CORS is permissive in `POST /api/verify` to ease local testing
+- The app uses SIWE (Sign-In with Ethereum) for authentication
 
-## API
-### POST `/api/verify`
+## API Endpoints
+
+### GET `/api/nonce`
+Generates a secure nonce for SIWE authentication.
+
+Response:
+```json
+{ "nonce": "random-uuid-string" }
+```
+
+### POST `/api/complete-siwe`
+Verifies SIWE signature and completes authentication.
+
 Body:
 ```json
 {
-  "payload": { /* ISuccessResult from MiniKit */ },
-  "action": "your-action-id",
-  "signal": ""
+  "payload": { /* MiniAppWalletAuthSuccessPayload from MiniKit */ },
+  "nonce": "nonce-from-step-1"
 }
 ```
+
 Success response (200):
 ```json
-{ "verifyRes": { "success": true, ... }, "status": 200 }
+{
+  "status": "success",
+  "isValid": true,
+  "user": {
+    "walletAddress": "0x...",
+    "username": null
+  }
+}
 ```
-Also returns 200 with `alreadyVerified: true` when `max_verifications_reached` is encountered.
 
 ## Scripts
 - `pnpm dev`: Run Next.js dev server (Turbopack)
@@ -100,13 +114,29 @@ Also returns 200 with `alreadyVerified: true` when `max_verifications_reached` i
 - `pnpm lint`: Lint
 
 ## Deployment
-- Set `NEXT_PUBLIC_WLD_APP_ID` and `NEXT_PUBLIC_WLD_ACTION_ID` in your hosting env (e.g., Vercel)
 - Deploy as a standard Next.js app
+- Ensure the app is accessible via HTTPS for World App integration
+
+## Features in Development
+- **Uniswap V4 Integration**: Advanced liquidity pool features
+- **Liquidity Provision**: Add/remove liquidity from pools
+- **Token Swapping**: Direct token exchange functionality
+- **Yield Optimization**: Automated yield farming strategies
+- **Analytics Dashboard**: Detailed pool performance metrics
+
+## Design Guidelines Compliance
+This app follows World mini app guidelines:
+- ✅ **Mobile-first design** with responsive layout
+- ✅ **iOS scroll bounce prevention** implemented
+- ✅ **Username display** instead of wallet addresses
+- ✅ **Privacy-preserving authentication** via World ID
+- ✅ **Clean, intuitive UI** with proper spacing and typography
+- ✅ **Fast loading times** with optimized performance
 
 ## Known limitations
-- Sudoku generator does not enforce a unique solution for every puzzle
-- The app must run inside World App for verification to work (`MiniKit.isInstalled()` check)
-- `manifest.json` is referenced in `layout.tsx`; if you want PWA features, add it to `public/`
+- The app must run inside World App for authentication to work (`MiniKit.isInstalled()` check)
+- DeFi features are currently in development (coming soon)
+- Requires World App for full functionality
 
 ## License
 No license specified. Add one if you plan to distribute.
