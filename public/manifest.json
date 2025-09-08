@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "Sudoku Challenge - World App",
+  "short_name": "Sudoku",
+  "description": "A tasteful, mobile-first Sudoku with World ID verification",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/sudoku.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/globe.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "puzzle", "entertainment"]
+}
+
+
