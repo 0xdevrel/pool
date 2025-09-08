@@ -4,6 +4,11 @@ import { ethers } from 'ethers';
 import { Token } from '@uniswap/sdk-core';
 import { AVAILABLE_TOKENS } from '@/constants/tokens';
 
+interface PriceData {
+  usd: number;
+  last_updated: string;
+}
+
 // ERC20 ABI for balance checking
 const ERC20_ABI = [
   'function balanceOf(address owner) view returns (uint256)',
@@ -103,8 +108,7 @@ class PortfolioService {
           const balanceFormatted = this.formatTokenAmount(balance);
           
           // Use pre-fetched price data
-          const priceData = prices[token.symbol || ''];
-          const price = priceData?.usd || 0;
+          const price = prices[token.symbol || ''] || 0;
           const balanceNum = parseFloat(balance);
           const usdValue = balanceNum * price;
           
@@ -201,8 +205,8 @@ class PortfolioService {
       }
       
       const data = await response.json();
-      if (data.success && data.prices[token.symbol]) {
-        return data.prices[token.symbol].usd;
+      if (data.success && data.prices && token.symbol && data.prices[token.symbol]) {
+        return (data.prices[token.symbol] as PriceData).usd;
       }
       
       console.warn(`No price data found for ${token.symbol}`);
@@ -225,7 +229,14 @@ class PortfolioService {
       
       const data = await response.json();
       if (data.success && data.prices) {
-        return data.prices;
+        // Extract USD values from the API response
+        const priceMap: { [symbol: string]: number } = {};
+        for (const [symbol, priceData] of Object.entries(data.prices)) {
+          if (typeof priceData === 'object' && priceData !== null && 'usd' in priceData) {
+            priceMap[symbol] = (priceData as PriceData).usd;
+          }
+        }
+        return priceMap;
       }
       
       return {};

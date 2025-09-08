@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Token } from "@uniswap/sdk-core";
 import { AVAILABLE_TOKENS, TOKEN_ICONS } from "@/constants/tokens";
 import { portfolioService } from "@/services/portfolioService";
@@ -90,7 +91,7 @@ export const TokenSelector = ({
           <div className="selected-token">
             <span className="token-icon">
               {getTokenIcon(selectedToken.symbol || '').startsWith('/') ? (
-                <img src={getTokenIcon(selectedToken.symbol || '')} alt={selectedToken.symbol || 'Token'} />
+                <Image src={getTokenIcon(selectedToken.symbol || '')} alt={selectedToken.symbol || 'Token'} width={24} height={24} />
               ) : (
                 getTokenIcon(selectedToken.symbol || '')
               )}
@@ -144,7 +145,7 @@ export const TokenSelector = ({
                   <div className="token-option-content">
                     <span className="token-icon">
                       {getTokenIcon(token.symbol || '').startsWith('/') ? (
-                        <img src={getTokenIcon(token.symbol || '')} alt={token.symbol || 'Token'} />
+                        <Image src={getTokenIcon(token.symbol || '')} alt={token.symbol || 'Token'} width={24} height={24} />
                       ) : (
                         getTokenIcon(token.symbol || '')
                       )}

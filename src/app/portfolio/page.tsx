@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { Navigation } from "@/components/Navigation";
 import { portfolioService, PortfolioSummary } from "@/services/portfolioService";
 import { FaSync, FaWallet, FaChartLine } from "react-icons/fa";
@@ -163,7 +164,7 @@ export default function PortfolioPage() {
                       <div className="token-info">
                         <span className="token-icon">
                           {getTokenIcon(tokenBalance.token.symbol || '').startsWith('/') ? (
-                            <img src={getTokenIcon(tokenBalance.token.symbol || '')} alt={tokenBalance.token.symbol || 'Token'} />
+                            <Image src={getTokenIcon(tokenBalance.token.symbol || '')} alt={tokenBalance.token.symbol || 'Token'} width={24} height={24} />
                           ) : (
                             getTokenIcon(tokenBalance.token.symbol || '')
                           )}

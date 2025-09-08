@@ -32,7 +32,7 @@ interface PriceResponse {
 }
 
 // In-memory cache for prices with 2-minute expiration
-let priceCache: { [key: string]: { price: number; timestamp: number } } = {};
+const priceCache: { [key: string]: { price: number; timestamp: number } } = {};
 const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes
 
 // Initialize cache with some basic prices to ensure the app works immediately
@@ -63,8 +63,8 @@ const initializeCache = () => {
 initializeCache();
 
 // Rate limiting: track last API call time
-let lastApiCall = 0;
-const MIN_API_INTERVAL = 2000; // Minimum 2 seconds between API calls to avoid rate limits
+// const lastApiCall = 0;
+// const MIN_API_INTERVAL = 2000; // Minimum 2 seconds between API calls to avoid rate limits
 
 // Background price fetcher
 let backgroundFetchInterval: NodeJS.Timeout | null = null;

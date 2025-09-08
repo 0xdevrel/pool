@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { WalletAuthButton } from "@/components/WalletAuthButton";
 import { Navigation } from "@/components/Navigation";
 import { PageHeader } from "@/components/PageHeader";
-import { useRouter } from "next/navigation";
-import { FaPlus, FaExchangeAlt, FaSync } from "react-icons/fa";
+// import { useRouter } from "next/navigation";
+import { FaSync } from "react-icons/fa";
 import { dashboardService, DashboardMetrics } from "@/services/dashboardService";
 
 interface User {
@@ -19,7 +20,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(false);
-  const router = useRouter();
+  // const router = useRouter();
 
   useEffect(() => {
     // Check if user is authenticated
@@ -69,17 +70,17 @@ export default function DashboardPage() {
     return `${sign}${value.toFixed(2)}%`;
   };
 
-  const formatSupply = (value: number) => {
-    if (value >= 1000000000) {
-      return `${(value / 1000000000).toFixed(2)}B`;
-    } else if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(2)}M`;
-    } else if (value >= 1000) {
-      return `${(value / 1000).toFixed(2)}K`;
-    } else {
-      return value.toFixed(0);
-    }
-  };
+  // const formatSupply = (value: number) => {
+  //   if (value >= 1000000000) {
+  //     return `${(value / 1000000000).toFixed(2)}B`;
+  //   } else if (value >= 1000000) {
+  //     return `${(value / 1000000).toFixed(2)}M`;
+  //   } else if (value >= 1000) {
+  //     return `${(value / 1000).toFixed(2)}K`;
+  //   } else {
+  //     return value.toFixed(0);
+  //   }
+  // };
 
   const renderInteractiveChart = (chartData: Array<{ timestamp: number; price: number }>) => {
     if (!chartData || chartData.length === 0) return null;
@@ -219,7 +220,7 @@ export default function DashboardPage() {
               <div className="hero-title">
                 <div className="wld-logo">
                   <div className="wld-icon">
-                    <img src="/wld.png" alt="Worldcoin" />
+                    <Image src="/wld.png" alt="Worldcoin" width={28} height={28} />
                   </div>
                   <div className="wld-info">
                     <h2>Worldcoin</h2>
@@ -275,14 +276,6 @@ export default function DashboardPage() {
                   <div className="stat-rank">#{metrics.wld.volumeRank} ranking</div>
                 </div>
 
-                <div className="stat-card tertiary">
-                  <div className="stat-header">
-                    <span className="stat-icon">🪙</span>
-                    <span className="stat-label">Circulating Supply</span>
-                  </div>
-                  <div className="stat-value">{formatSupply(metrics.wld.circulatingSupply)}</div>
-                  <div className="stat-rank">of {formatSupply(metrics.wld.totalSupply)} total</div>
-                </div>
               </div>
             </section>
           )}
@@ -294,8 +287,6 @@ export default function DashboardPage() {
                 <h3>Price Performance</h3>
                 <div className="chart-controls">
                   <button className="timeframe-btn active">7D</button>
-                  <button className="timeframe-btn">30D</button>
-                  <button className="timeframe-btn">1Y</button>
                 </div>
               </div>
               

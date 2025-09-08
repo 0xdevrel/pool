@@ -8,7 +8,7 @@ export interface WLDPriceData {
   volumeRank: number;
   circulatingSupply: number;
   totalSupply: number;
-  maxSupply: number;
+  maxSupply: number | null;
   lastUpdated: Date;
 }
 

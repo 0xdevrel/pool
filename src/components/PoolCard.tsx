@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { PoolData } from "@/services/poolService";
 
 interface PoolCardProps {
@@ -51,14 +52,14 @@ export const PoolCard = ({ pool, onClick }: PoolCardProps) => {
           <div className="token-icons">
             <span className="token-icon">
               {getTokenIcon(pool.token0.symbol).startsWith('/') ? (
-                <img src={getTokenIcon(pool.token0.symbol)} alt={pool.token0.symbol} />
+                <Image src={getTokenIcon(pool.token0.symbol)} alt={pool.token0.symbol} width={24} height={24} />
               ) : (
                 getTokenIcon(pool.token0.symbol)
               )}
             </span>
             <span className="token-icon">
               {getTokenIcon(pool.token1.symbol).startsWith('/') ? (
-                <img src={getTokenIcon(pool.token1.symbol)} alt={pool.token1.symbol} />
+                <Image src={getTokenIcon(pool.token1.symbol)} alt={pool.token1.symbol} width={24} height={24} />
               ) : (
                 getTokenIcon(pool.token1.symbol)
               )}
