@@ -91,11 +91,7 @@ export default function PortfolioPage() {
   if (!user) {
     return (
       <div className="portfolio-page">
-        <PageHeader 
-          title="Portfolio" 
-          subtitle="Please log in to view your portfolio" 
-          showAvatar={false}
-        />
+        <PageHeader title="Portfolio" showAvatar={false} />
         <Navigation />
       </div>
     );
@@ -103,10 +99,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="portfolio-page">
-      <PageHeader 
-        title="Portfolio" 
-        subtitle="Your token holdings on World Chain" 
-      />
+      <PageHeader title="Portfolio" />
       
       <div className="page-content">
         <div className="portfolio-header-actions">

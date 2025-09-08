@@ -7,10 +7,7 @@ import { PageHeader } from "@/components/PageHeader";
 export default function PoolsPage() {
   return (
     <div className="pools-page">
-      <PageHeader 
-        title="Liquidity Pools" 
-        subtitle="Explore and manage World Chain pools" 
-      />
+      <PageHeader title="World Chain Pools" />
       
       <div className="page-content">
         <PoolList />

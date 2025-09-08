@@ -86,24 +86,22 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
         <p>Set a specific price for your trade</p>
       </div>
 
-      {!tokenIn || !tokenOut ? (
-        <div className="popular-pairs">
-          <h3>Popular Pairs</h3>
-          <div className="pair-buttons">
-            {popularPairs.map((pair, index) => (
-              <button
-                key={index}
-                className="pair-button"
-                onClick={() => handlePairSelect(pair)}
-              >
-                <span className="pair-tokens">
-                  {pair.tokenIn.symbol}/{pair.tokenOut.symbol}
-                </span>
-              </button>
-            ))}
-          </div>
+      <div className="popular-pairs">
+        <h3>Popular Pairs</h3>
+        <div className="pair-buttons">
+          {popularPairs.map((pair, index) => (
+            <button
+              key={index}
+              className="pair-button"
+              onClick={() => handlePairSelect(pair)}
+            >
+              <span className="pair-tokens">
+                {pair.tokenIn.symbol}/{pair.tokenOut.symbol}
+              </span>
+            </button>
+          ))}
         </div>
-      ) : null}
+      </div>
 
       <div className="limit-order-inputs">
         <SwapInput

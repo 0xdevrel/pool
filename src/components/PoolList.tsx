@@ -86,7 +86,6 @@ export const PoolList = ({ className = "" }: PoolListProps) => {
       {/* Header with filters */}
       <div className="pool-list-header">
         <div className="list-title">
-          <h2>World Chain Pools</h2>
           <span className="pool-count">{filteredAndSortedPools.length} pools</span>
         </div>
         

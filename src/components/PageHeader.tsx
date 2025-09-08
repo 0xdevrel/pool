@@ -14,7 +14,7 @@ interface User {
 
 interface PageHeaderProps {
   title: string;
-  subtitle: string;
+  subtitle?: string;
   showAvatar?: boolean;
 }
 
@@ -87,7 +87,7 @@ export const PageHeader = ({ title, subtitle, showAvatar = true }: PageHeaderPro
       <div className="header-content">
         <div className="header-left">
           <h1 className="page-title">{title}</h1>
-          <p className="page-subtitle">{subtitle}</p>
+          {subtitle && <p className="page-subtitle">{subtitle}</p>}
         </div>
         {showAvatar && user && (
           <div className="header-right">

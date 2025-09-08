@@ -59,10 +59,7 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-container">
-      <PageHeader 
-        title="Pool" 
-        subtitle="Liquidity Pools" 
-      />
+      <PageHeader title="Pool" />
 
       {/* Main Dashboard Content */}
       <main className="dashboard-main">

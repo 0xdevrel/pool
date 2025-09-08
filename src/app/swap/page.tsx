@@ -27,10 +27,7 @@ export default function SwapPage() {
 
   return (
     <div className="swap-page">
-      <PageHeader 
-        title="Trade" 
-        subtitle="Swap tokens and create limit orders on World Chain" 
-      />
+      <PageHeader title="Trade" />
       
       <div className="swap-tabs">
         <button 
