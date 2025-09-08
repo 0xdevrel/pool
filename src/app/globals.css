@@ -38,6 +38,8 @@
   min-height: 100vh;
   padding: 20px;
   text-align: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .loading-spinner {
@@ -61,6 +63,8 @@
   display: flex;
   flex-direction: column;
   background: var(--background);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .dashboard-header {
@@ -543,12 +547,9 @@
   padding: 0;
 }
 
-html,
-body {
-  width: 100vw;
-  height: 100vh;
+html {
   overscroll-behavior: none;
-  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -560,6 +561,7 @@ body {
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
 }
 
 /* ===== WELCOME/VERIFICATION SCREENS ===== */
@@ -572,6 +574,8 @@ body {
   justify-content: center;
   padding: var(--game-padding);
   position: relative;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .welcome-content {
