@@ -23,20 +23,19 @@ export const PoolCard = ({ pool, onClick }: PoolCardProps) => {
   };
 
   const getTokenIcon = (symbol: string) => {
-    // In a real app, you'd have actual token icons
     const iconMap: { [key: string]: string } = {
-      'ETH': '🔷',
-      'WLD': '🌍',
-      'USDC': '💵',
-      'USDT': '💵',
-      'USD₮0': '💵',
-      'WBTC': '₿',
-      'uSOL': '☀️',
-      'uXRP': '💎',
-      'uDOGE': '🐕',
-      'uSUI': '💧',
+      'ETH': '/eth.png',
+      'WLD': '/wld.png',
+      'USDC': '/usdc.png',
+      'USDT': '/usdt.png',
+      'USD₮0': '/usdt.png',
+      'WBTC': '/wbtc.png',
+      'uSOL': '/solana.png',
+      'uXRP': '/xrp.png',
+      'uDOGE': '/doge.png',
+      'uSUI': '💧', // No image available
     };
-    return iconMap[symbol] || '🪙';
+    return iconMap[symbol] || '/eth.png'; // Default to ETH image
   };
 
   const handleClick = () => {
@@ -50,8 +49,20 @@ export const PoolCard = ({ pool, onClick }: PoolCardProps) => {
       <div className="pool-header">
         <div className="token-pair">
           <div className="token-icons">
-            <span className="token-icon">{getTokenIcon(pool.token0.symbol)}</span>
-            <span className="token-icon">{getTokenIcon(pool.token1.symbol)}</span>
+            <span className="token-icon">
+              {getTokenIcon(pool.token0.symbol).startsWith('/') ? (
+                <img src={getTokenIcon(pool.token0.symbol)} alt={pool.token0.symbol} />
+              ) : (
+                getTokenIcon(pool.token0.symbol)
+              )}
+            </span>
+            <span className="token-icon">
+              {getTokenIcon(pool.token1.symbol).startsWith('/') ? (
+                <img src={getTokenIcon(pool.token1.symbol)} alt={pool.token1.symbol} />
+              ) : (
+                getTokenIcon(pool.token1.symbol)
+              )}
+            </span>
           </div>
           <div className="token-names">
             <span className="token-symbol">{pool.token0.symbol}</span>

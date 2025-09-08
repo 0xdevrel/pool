@@ -63,7 +63,7 @@ export const TokenSelector = ({
   };
 
   const getTokenIcon = (symbol: string) => {
-    return TOKEN_ICONS[symbol] || '🪙';
+    return TOKEN_ICONS[symbol] || '/eth.png';
   };
 
   const formatBalance = (balance: string) => {
@@ -88,7 +88,13 @@ export const TokenSelector = ({
       >
         {selectedToken ? (
           <div className="selected-token">
-            <span className="token-icon">{getTokenIcon(selectedToken.symbol || '')}</span>
+            <span className="token-icon">
+              {getTokenIcon(selectedToken.symbol || '').startsWith('/') ? (
+                <img src={getTokenIcon(selectedToken.symbol || '')} alt={selectedToken.symbol || 'Token'} />
+              ) : (
+                getTokenIcon(selectedToken.symbol || '')
+              )}
+            </span>
             <div className="token-info">
               <span className="token-symbol">{selectedToken.symbol}</span>
               <span className="token-name">{selectedToken.name}</span>
@@ -136,7 +142,13 @@ export const TokenSelector = ({
                   onClick={() => handleTokenSelect(token)}
                 >
                   <div className="token-option-content">
-                    <span className="token-icon">{getTokenIcon(token.symbol || '')}</span>
+                    <span className="token-icon">
+                      {getTokenIcon(token.symbol || '').startsWith('/') ? (
+                        <img src={getTokenIcon(token.symbol || '')} alt={token.symbol || 'Token'} />
+                      ) : (
+                        getTokenIcon(token.symbol || '')
+                      )}
+                    </span>
                     <div className="token-details">
                       <div className="token-symbol">{token.symbol}</div>
                       <div className="token-name">{token.name}</div>

@@ -102,17 +102,17 @@ export const AVAILABLE_TOKENS = [
   USDT0_TOKEN,  // Stargate USD₮0
 ];
 
-// Token icons mapping (matching the interface)
+// Token icons mapping (using local images)
 export const TOKEN_ICONS: { [key: string]: string } = {
-  'ETH': '🔷',     // World Chain ETH
-  'USDC': '💵',    // USDC
-  'WLD': '🌍',     // Worldcoin
-  'WBTC': '₿',     // Wrapped BTC
-  'uXRP': '💎',    // XRP (Universal)
-  'uDOGE': '🐕',   // Dogecoin (Universal)
-  'uSOL': '☀️',    // Solana (Universal)
-  'uSUI': '💧',    // Sui (Universal)
-  'USD₮0': '💵',   // Stargate USD₮0
+  'ETH': '/eth.png',     // World Chain ETH
+  'USDC': '/usdc.png',   // USDC
+  'WLD': '/wld.png',     // Worldcoin
+  'WBTC': '/wbtc.png',   // Wrapped BTC
+  'uXRP': '/xrp.png',    // XRP (Universal)
+  'uDOGE': '/doge.png',  // Dogecoin (Universal)
+  'uSOL': '/solana.png', // Solana (Universal)
+  'uSUI': '/sui.png',          // Sui (Universal) - no image available
+  'USD₮0': '/usdt.png',  // Stargate USD₮0
 };
 
 // Common pool configurations for World Chain (matching available tokens)

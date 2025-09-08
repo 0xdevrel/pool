@@ -74,18 +74,19 @@ export default function PortfolioPage() {
 
   const getTokenIcon = (symbol: string) => {
     const icons: { [key: string]: string } = {
-      'WETH': '🔷',
-      'WLD': '🌍',
-      'USDC': '💵',
-      'USDT': '💵',
-      'USD₮0': '💵',
-      'WBTC': '₿',
-      'uSOL': '☀️',
-      'uXRP': '💎',
-      'uDOGE': '🐕',
-      'uSUI': '💧',
+      'WETH': '/eth.png',
+      'ETH': '/eth.png',
+      'WLD': '/wld.png',
+      'USDC': '/usdc.png',
+      'USDT': '/usdt.png',
+      'USD₮0': '/usdt.png',
+      'WBTC': '/wbtc.png',
+      'uSOL': '/solana.png',
+      'uXRP': '/xrp.png',
+      'uDOGE': '/doge.png',
+      'uSUI': '💧', // No image available
     };
-    return icons[symbol] || '🪙';
+    return icons[symbol] || '/eth.png'; // Default to ETH image
   };
 
   if (!user) {
@@ -161,7 +162,11 @@ export default function PortfolioPage() {
                     <div key={`${tokenBalance.token.address}-${tokenBalance.token.symbol}`} className="holding-card">
                       <div className="token-info">
                         <span className="token-icon">
-                          {getTokenIcon(tokenBalance.token.symbol || '')}
+                          {getTokenIcon(tokenBalance.token.symbol || '').startsWith('/') ? (
+                            <img src={getTokenIcon(tokenBalance.token.symbol || '')} alt={tokenBalance.token.symbol || 'Token'} />
+                          ) : (
+                            getTokenIcon(tokenBalance.token.symbol || '')
+                          )}
                         </span>
                         <div className="token-details">
                           <h4 className="token-symbol">{tokenBalance.token.symbol}</h4>
