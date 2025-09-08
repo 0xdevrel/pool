@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { WalletAuthButton } from "@/components/WalletAuthButton";
+import { Navigation } from "@/components/Navigation";
+import { PoolList } from "@/components/PoolList";
 import { useRouter } from "next/navigation";
-import { FaUser, FaSignOutAlt } from "react-icons/fa";
+import { FaUser, FaSignOutAlt, FaPlus, FaExchangeAlt } from "react-icons/fa";
 import { MiniKit } from "@worldcoin/minikit-js";
 import Image from "next/image";
 
@@ -233,23 +235,40 @@ export default function DashboardPage() {
           <section className="actions-section">
             <h3 className="section-title">Quick Actions</h3>
             <div className="actions-grid">
-              <button className="action-button primary" disabled>
-                <span className="action-icon">➕</span>
+              <button className="action-button primary" onClick={() => router.push('/pools')}>
+                <FaPlus className="action-icon" />
                 <span>Add Liquidity</span>
               </button>
-              <button className="action-button secondary" disabled>
-                <span className="action-icon">🔄</span>
+              <button className="action-button secondary" onClick={() => router.push('/swap')}>
+                <FaExchangeAlt className="action-icon" />
                 <span>Swap Tokens</span>
               </button>
-              <button className="action-button secondary" disabled>
+              <button className="action-button secondary" onClick={() => router.push('/pools')}>
                 <span className="action-icon">📊</span>
-                <span>View Analytics</span>
+                <span>View Pools</span>
               </button>
+            </div>
+          </section>
+
+          {/* Top Pools Preview */}
+          <section className="pools-preview-section">
+            <div className="section-header">
+              <h3 className="section-title">Top Pools</h3>
+              <button 
+                className="view-all-button"
+                onClick={() => router.push('/pools')}
+              >
+                View All
+              </button>
+            </div>
+            <div className="pools-preview">
+              <PoolList className="preview-mode" />
             </div>
           </section>
         </div>
       </main>
 
+      <Navigation />
     </div>
   );
 }
