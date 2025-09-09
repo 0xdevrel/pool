@@ -6,15 +6,11 @@ import { Navigation } from "@/components/Navigation";
 import { portfolioService, PortfolioSummary } from "@/services/portfolioService";
 import { FaSync, FaWallet, FaChartLine } from "react-icons/fa";
 import { PageHeader } from "@/components/PageHeader";
-
-interface User {
-  walletAddress: string;
-  username?: string;
-  profilePictureUrl?: string;
-}
+import { AuthGuard } from "@/components/AuthGuard";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function PortfolioPage() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user } = useAuth();
   const [portfolio, setPortfolio] = useState<PortfolioSummary | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -35,15 +31,6 @@ export default function PortfolioPage() {
       setLoading(false);
     }
   }, [user?.walletAddress]);
-
-  useEffect(() => {
-    // Get user data from localStorage
-    const storedUser = localStorage.getItem('pool_user');
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-    }
-  }, []);
 
   useEffect(() => {
     if (user?.walletAddress) {
@@ -90,17 +77,9 @@ export default function PortfolioPage() {
     return icons[symbol] || '/eth.png'; // Default to ETH image
   };
 
-  if (!user) {
-    return (
-      <div className="portfolio-page">
-        <PageHeader title="Portfolio" showAvatar={false} />
-        <Navigation />
-      </div>
-    );
-  }
-
   return (
-    <div className="portfolio-page">
+    <AuthGuard>
+      <div className="portfolio-page">
       <PageHeader title="Portfolio" />
       
       <div className="page-content">
@@ -202,6 +181,7 @@ export default function PortfolioPage() {
       </div>
       
       <Navigation />
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

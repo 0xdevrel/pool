@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { MiniKit } from "@worldcoin/minikit-js";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 declare global {
   interface Window {
@@ -20,17 +21,23 @@ export default function MiniKitProvider({ children }: { children: ReactNode }) {
           MiniKit.install();
         }
 
-        // Make MiniKit available globally for debugging
+        // Make MiniKit available globally
         window.MiniKit = MiniKit;
 
-        // Wait for initialization
-       
+        // Wait for MiniKit to be ready
+        if (MiniKit.isInstalled()) {
+          // MiniKit is available, we can proceed
+          console.log("MiniKit is installed and ready");
+        } else {
+          console.log("MiniKit not installed - running outside World App");
+        }
 
         setIsInitialized(true);
-        console.log("MiniKit initialized successfully");
-        console.log("Running inside World App:", MiniKit.isInstalled());
+        console.log("MiniKit provider initialized successfully");
       } catch (error) {
         console.error("MiniKit initialization error:", error);
+        // Still initialize even if there's an error
+        setIsInitialized(true);
       }
     };
 
@@ -48,5 +55,9 @@ export default function MiniKitProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <AuthProvider>
+      {children}
+    </AuthProvider>
+  );
 }

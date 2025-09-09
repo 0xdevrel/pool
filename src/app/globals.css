@@ -175,7 +175,29 @@
 }
 
 .user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   text-align: left;
+}
+
+.user-avatar-menu {
+  flex-shrink: 0;
+}
+
+.user-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.avatar-image-small {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-icon-small {
+  font-size: 24px;
+  color: var(--secondary);
 }
 
 .user-name {
@@ -2152,6 +2174,15 @@ body {
 .nav-item.active {
   color: var(--accent);
   background: var(--accent-soft);
+}
+
+.nav-item.logout {
+  color: var(--error);
+}
+
+.nav-item.logout:hover {
+  color: var(--error);
+  background: var(--error-soft);
 }
 
 .nav-icon {

@@ -1,16 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FaUser, FaSignOutAlt } from "react-icons/fa";
-import { MiniKit } from "@worldcoin/minikit-js";
+import { FaUser, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-
-interface User {
-  walletAddress: string;
-  username?: string;
-  profilePictureUrl?: string;
-}
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PageHeaderProps {
   title: string;
@@ -19,23 +13,17 @@ interface PageHeaderProps {
 }
 
 export const PageHeader = ({ title, subtitle, showAvatar = true }: PageHeaderProps) => {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, logout, refreshUser } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // Get user data from localStorage
-    const storedUser = localStorage.getItem('pool_user');
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-      
-      // Fetch username from MiniKit if not already available
-      if (!userData.username && userData.walletAddress) {
-        fetchUserInfo(userData.walletAddress);
-      }
+    // Refresh user data when component mounts
+    if (user) {
+      refreshUser();
     }
-  }, []);
+  }, [user, refreshUser]);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -52,28 +40,8 @@ export const PageHeader = ({ title, subtitle, showAvatar = true }: PageHeaderPro
     }
   }, [showUserMenu]);
 
-  const fetchUserInfo = async (walletAddress: string) => {
-    try {
-      if (MiniKit.isInstalled()) {
-        const userInfo = await MiniKit.getUserByAddress(walletAddress);
-        if (userInfo) {
-          const updatedUser = {
-            walletAddress,
-            username: userInfo.username,
-            profilePictureUrl: userInfo.profilePictureUrl,
-          };
-          setUser(updatedUser);
-          localStorage.setItem('pool_user', JSON.stringify(updatedUser));
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch user info:', error);
-    }
-  };
-
   const handleSignOut = () => {
-    setUser(null);
-    localStorage.removeItem('pool_user');
+    logout();
     setShowUserMenu(false);
     router.push('/');
   };
@@ -81,6 +49,19 @@ export const PageHeader = ({ title, subtitle, showAvatar = true }: PageHeaderPro
   const toggleUserMenu = () => {
     setShowUserMenu(!showUserMenu);
   };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  const resetImageError = () => {
+    setImageError(false);
+  };
+
+  // Reset image error when user changes
+  useEffect(() => {
+    resetImageError();
+  }, [user?.profilePictureUrl]);
 
   return (
     <header className="page-header">
@@ -93,27 +74,44 @@ export const PageHeader = ({ title, subtitle, showAvatar = true }: PageHeaderPro
           <div className="header-right">
             <div className="user-menu-container">
               <div className="user-avatar-small" onClick={toggleUserMenu}>
-                {user.profilePictureUrl ? (
+                {user.profilePictureUrl && !imageError ? (
                   <Image 
                     src={user.profilePictureUrl} 
                     alt="Profile" 
                     width={40}
                     height={40}
                     className="avatar-image"
+                    onError={handleImageError}
                   />
                 ) : (
-                  <FaUser className="avatar-icon" />
+                  <FaUserCircle className="avatar-icon" />
                 )}
               </div>
               {showUserMenu && (
                 <div className="user-menu">
                   <div className="user-menu-header">
                     <div className="user-info">
-                      <div className="user-name">
-                        {user.username || "Anonymous User"}
+                      <div className="user-avatar-menu">
+                        {user.profilePictureUrl && !imageError ? (
+                          <Image 
+                            src={user.profilePictureUrl} 
+                            alt="Profile" 
+                            width={32}
+                            height={32}
+                            className="avatar-image-small"
+                            onError={handleImageError}
+                          />
+                        ) : (
+                          <FaUserCircle className="avatar-icon-small" />
+                        )}
                       </div>
-                      <div className="user-address">
-                        {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+                      <div className="user-details">
+                        <div className="user-name">
+                          {user.username || "Anonymous User"}
+                        </div>
+                        <div className="user-address">
+                          {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
+                        </div>
                       </div>
                     </div>
                   </div>

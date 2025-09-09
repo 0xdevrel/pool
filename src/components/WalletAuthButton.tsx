@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { MiniKit, MiniAppWalletAuthSuccessPayload } from "@worldcoin/minikit-js";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface WalletAuthButtonProps {
-  onAuthenticationSuccess: (user: { walletAddress: string; username?: string }) => void;
+  onAuthenticationSuccess?: (user: { walletAddress: string; username?: string }) => void;
 }
 
 export const WalletAuthButton = ({ onAuthenticationSuccess }: WalletAuthButtonProps) => {
+  const { login } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,10 +73,18 @@ export const WalletAuthButton = ({ onAuthenticationSuccess }: WalletAuthButtonPr
           console.warn('Could not fetch username:', error);
         }
         
-        onAuthenticationSuccess({
+        const userData = {
           walletAddress: walletAddress,
           username: username,
-        });
+        };
+        
+        // Update auth context
+        login(userData);
+        
+        // Call optional callback
+        if (onAuthenticationSuccess) {
+          onAuthenticationSuccess(userData);
+        }
       } else {
         setError(result.message || "Authentication verification failed. Please try again.");
       }

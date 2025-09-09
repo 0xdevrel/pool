@@ -2,35 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { WalletAuthButton } from "@/components/WalletAuthButton";
 import { Navigation } from "@/components/Navigation";
 import { PageHeader } from "@/components/PageHeader";
-// import { useRouter } from "next/navigation";
+import { AuthGuard } from "@/components/AuthGuard";
+import { useAuth } from "@/contexts/AuthContext";
 import { FaSync } from "react-icons/fa";
 import { dashboardService, DashboardMetrics } from "@/services/dashboardService";
 
-interface User {
-  walletAddress: string;
-  username?: string;
-  profilePictureUrl?: string;
-}
-
 export default function DashboardPage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(false);
-  // const router = useRouter();
-
-  useEffect(() => {
-    // Check if user is authenticated
-    const storedUser = localStorage.getItem('pool_user');
-    if (storedUser) {
-      const userData = JSON.parse(storedUser);
-      setUser(userData);
-    }
-    setIsLoading(false);
-  }, []);
 
   useEffect(() => {
     if (user) {
@@ -50,10 +32,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleAuthenticationSuccess = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('pool_user', JSON.stringify(userData));
-  };
 
   const formatUSD = (value: number) => {
     if (value >= 1000000) {
@@ -174,31 +152,9 @@ export default function DashboardPage() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="loading-screen">
-        <div className="loading-spinner"></div>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="auth-required-screen">
-        <div className="auth-content">
-          <div className="auth-card">
-            <h1 className="text-2xl font-bold mb-4">Authentication Required</h1>
-            <p className="text-gray-600 mb-6">Please sign in to access your dashboard.</p>
-            <WalletAuthButton onAuthenticationSuccess={handleAuthenticationSuccess} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="dashboard-container">
+    <AuthGuard>
+      <div className="dashboard-container">
       <PageHeader title="Pool" />
 
       {/* Main Dashboard Content */}
@@ -207,7 +163,7 @@ export default function DashboardPage() {
           {/* Welcome Section */}
           <section className="welcome-section">
             <h2 className="welcome-title">
-              Welcome back, {user.username || "User"}!
+              Welcome back, {user?.username || "User"}!
             </h2>
             <p className="welcome-subtitle">
               Track World Chain liquidity and trading activity
@@ -345,6 +301,7 @@ export default function DashboardPage() {
       </main>
 
       <Navigation />
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

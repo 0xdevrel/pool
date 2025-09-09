@@ -96,7 +96,7 @@ export const SwapInterface = ({ className = "", userAddress }: SwapInterfaceProp
         amountIn,
         slippageTolerance,
         deadline: Math.floor(Date.now() / 1000) + (deadline * 60),
-      }, quote);
+      }, quote, userAddress);
 
       // Show success message
       alert(`Swap successful! Transaction hash: ${txHash}`);

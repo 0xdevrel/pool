@@ -40,7 +40,7 @@ const initializeCache = () => {
   const now = Date.now();
   const initialPrices = {
     'ETH': 4300,
-    'WLD': 1.5,
+    'WLD': 1.9, // Updated to current market price
     'USDC': 1.0,
     'WBTC': 115000,
     'uXRP': 3.0,
@@ -99,10 +99,10 @@ const fetchPricesFromCoinMarketCap = async (): Promise<boolean> => {
         if (data.data && data.data[cmcId]) {
           let price = data.data[cmcId].quote.USD.price;
           
-          // Fix WLD price - it seems to be in a different unit
-          if (symbol === 'WLD' && price < 0.01) {
-            // WLD price seems to be in a different unit, let's use a reasonable fallback
-            price = 1.5; // Use a reasonable WLD price
+          // Fix WLD price - CoinMarketCap sometimes returns incorrect values
+          if (symbol === 'WLD' && (price < 0.01 || price > 100)) {
+            // WLD price should be around $1.5-2.0, if it's way off, use a reasonable fallback
+            price = 1.9; // Use current market price for WLD
             console.log(`Fixed WLD price from ${data.data[cmcId].quote.USD.price} to ${price}`);
           }
           
@@ -126,11 +126,37 @@ const fetchPricesFromCoinMarketCap = async (): Promise<boolean> => {
   }
 };
 
+// Fetch WLD price specifically from CoinGecko since CMC has issues
+const fetchWLDPriceFromCoinGecko = async (): Promise<boolean> => {
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=worldcoin-wld&vs_currencies=usd');
+    if (response.ok) {
+      const data = await response.json();
+      if (data['worldcoin-wld'] && data['worldcoin-wld'].usd) {
+        const wldPrice = data['worldcoin-wld'].usd;
+        const now = Date.now();
+        priceCache['WLD'] = {
+          price: wldPrice,
+          timestamp: now,
+        };
+        console.log(`CoinGecko cached WLD: ${wldPrice}`);
+        return true;
+      }
+    }
+  } catch (error) {
+    console.warn('CoinGecko WLD fetch error:', error);
+  }
+  return false;
+};
+
 const fetchPricesInBackground = async () => {
   // Try CoinMarketCap first since it's working
   const cmcSuccess = await fetchPricesFromCoinMarketCap();
   
-  // If CoinMarketCap fails, try CoinGecko
+  // Always try to get WLD price from CoinGecko as fallback since CMC has issues with WLD
+  await fetchWLDPriceFromCoinGecko();
+  
+  // If CoinMarketCap fails, try CoinGecko for other tokens
   if (!cmcSuccess) {
     try {
       const coinGeckoIds = Object.values(TOKEN_COINGECKO_MAP);
@@ -184,6 +210,17 @@ if (!backgroundFetchInterval) {
   // Also fetch immediately
   fetchPricesInBackground();
 }
+
+// Clear cache on startup to force fresh data
+const clearCacheOnStartup = () => {
+  console.log('Clearing price cache on startup to force fresh data');
+  Object.keys(priceCache).forEach(key => {
+    priceCache[key].timestamp = 0; // Mark as expired
+  });
+};
+
+// Clear cache when module loads
+clearCacheOnStartup();
 
 export async function GET(request: NextRequest) {
   try {
@@ -249,6 +286,12 @@ export async function GET(request: NextRequest) {
       }
     }
     
+    console.log('Prices API returning:', {
+      success: true,
+      prices: finalPrices,
+      cache_hit_rate: `${cachedTokens.length}/${tokens.length}`,
+    });
+
     return NextResponse.json({
       success: true,
       prices: finalPrices,

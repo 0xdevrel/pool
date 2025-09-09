@@ -220,18 +220,19 @@ export class SwapService {
 
 
   // Execute swap using V4 Universal Router via MiniKit
-  async executeSwap(params: SwapParams, quote: SwapQuote): Promise<string> {
+  async executeSwap(params: SwapParams, quote: SwapQuote, userAddress?: string): Promise<string> {
     try {
       // Check if MiniKit is available
       if (typeof window === 'undefined' || !window.MiniKit) {
         throw new Error('MiniKit not available');
       }
 
-      const { MiniKit } = window as { MiniKit: { user?: { walletAddress?: string }; sendTransaction?: (params: unknown) => Promise<unknown> } };
+      const { MiniKit } = window as { MiniKit: { user?: { walletAddress?: string }; commandsAsync?: { sendTransaction: (params: unknown) => Promise<unknown> } } };
 
-      // Check if user is connected
-      if (!MiniKit.user?.walletAddress) {
-        throw new Error('User not connected');
+      // Check if user is connected - use provided userAddress or check MiniKit
+      const walletAddress = userAddress || MiniKit.user?.walletAddress;
+      if (!walletAddress) {
+        throw new Error('User not connected. Please sign in to perform swaps.');
       }
 
       // Create V4 pool key

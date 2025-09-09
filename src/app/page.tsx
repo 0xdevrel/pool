@@ -1,35 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { WalletAuthButton } from "@/components/WalletAuthButton";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-interface User {
-  walletAddress: string;
-  username?: string;
-}
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function HomePage() {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is already authenticated
-    const storedUser = localStorage.getItem('pool_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-      // Redirect to dashboard if already authenticated
+    // Redirect to dashboard if already authenticated
+    if (isAuthenticated && !isLoading) {
       router.push('/dashboard');
     }
-    setIsLoading(false);
-  }, [router]);
+  }, [isAuthenticated, isLoading, router]);
 
-  const handleAuthenticationSuccess = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('pool_user', JSON.stringify(userData));
+  const handleAuthenticationSuccess = () => {
     // Redirect to dashboard after successful authentication
     router.push('/dashboard');
   };
@@ -43,7 +32,7 @@ export default function HomePage() {
     );
   }
 
-  if (user) {
+  if (isAuthenticated) {
     return (
       <div className="loading-screen">
         <div className="loading-spinner"></div>
