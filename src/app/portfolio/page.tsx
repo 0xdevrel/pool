@@ -116,8 +116,10 @@ export default function PortfolioPage() {
         </div>
         {loading && (
           <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Loading portfolio...</p>
+            <div className="loading-card">
+              <div className="loading-spinner"></div>
+              <p>Loading portfolio...</p>
+            </div>
           </div>
         )}
 

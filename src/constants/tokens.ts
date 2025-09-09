@@ -100,11 +100,11 @@ export const USDT0_TOKEN = new Token(
   'Stargate USD₮0'
 );
 
-// All available tokens on World Chain
+// All available tokens on World Chain (ordered with World token first)
 export const AVAILABLE_TOKENS = [
+  WLD_TOKEN,    // Worldcoin (World token first)
   ETH_TOKEN,    // World Chain ETH
   USDC_TOKEN,   // USDC
-  WLD_TOKEN,    // Worldcoin
   WBTC_TOKEN,   // Wrapped BTC
   uXRP_TOKEN,   // XRP (Universal)
   uDOGE_TOKEN,  // Dogecoin (Universal)

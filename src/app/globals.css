@@ -3893,4 +3893,67 @@ body {
   }
 }
 
+/* ===== LOADING STATES FOR TOKEN SELECTOR ===== */
+
+.loading-balances {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--secondary);
+  gap: 12px;
+}
+
+.loading-balances .loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border);
+  border-top: 2px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-balances span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* ===== PORTFOLIO LOADING CARD ===== */
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.loading-card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  max-width: 300px;
+  width: 100%;
+}
+
+.loading-card .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.loading-card p {
+  color: var(--secondary);
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+}
+
 

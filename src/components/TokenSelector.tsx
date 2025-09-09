@@ -24,6 +24,7 @@ export const TokenSelector = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [tokenBalances, setTokenBalances] = useState<{ [key: string]: string }>({});
+  const [isLoadingBalances, setIsLoadingBalances] = useState(false);
 
   useEffect(() => {
     const loadBalances = async () => {
@@ -34,20 +35,41 @@ export const TokenSelector = ({
           balances[token.address] = "0";
         }
         setTokenBalances(balances);
+        setIsLoadingBalances(false);
         return;
       }
 
+      setIsLoadingBalances(true);
       const balances: { [key: string]: string } = {};
-      for (const token of AVAILABLE_TOKENS) {
-        try {
-          const balance = await portfolioService.getTokenBalance(token, userAddress);
-          balances[token.address] = balance;
-        } catch (error) {
-          console.error(`Error loading balance for ${token.symbol}:`, error);
+      
+      try {
+        // Load balances in parallel for better performance
+        const balancePromises = AVAILABLE_TOKENS.map(async (token) => {
+          try {
+            const balance = await portfolioService.getTokenBalance(token, userAddress);
+            return { address: token.address, balance };
+          } catch (error) {
+            console.error(`Error loading balance for ${token.symbol}:`, error);
+            return { address: token.address, balance: "0" };
+          }
+        });
+
+        const results = await Promise.all(balancePromises);
+        results.forEach(({ address, balance }) => {
+          balances[address] = balance;
+        });
+        
+        setTokenBalances(balances);
+      } catch (error) {
+        console.error('Error loading token balances:', error);
+        // Set all balances to 0 on error
+        for (const token of AVAILABLE_TOKENS) {
           balances[token.address] = "0";
         }
+        setTokenBalances(balances);
+      } finally {
+        setIsLoadingBalances(false);
       }
-      setTokenBalances(balances);
     };
     loadBalances();
   }, [userAddress]);
@@ -136,30 +158,37 @@ export const TokenSelector = ({
             </div>
 
             <div className="token-list">
-              {filteredTokens.map((token) => (
-                <button
-                  key={`${token.address}-${token.symbol}`}
-                  className="token-option"
-                  onClick={() => handleTokenSelect(token)}
-                >
-                  <div className="token-option-content">
-                    <span className="token-icon">
-                      {getTokenIcon(token.symbol || '').startsWith('/') ? (
-                        <Image src={getTokenIcon(token.symbol || '')} alt={token.symbol || 'Token'} width={24} height={24} />
-                      ) : (
-                        getTokenIcon(token.symbol || '')
-                      )}
-                    </span>
-                    <div className="token-details">
-                      <div className="token-symbol">{token.symbol}</div>
-                      <div className="token-name">{token.name}</div>
+              {isLoadingBalances ? (
+                <div className="loading-balances">
+                  <div className="loading-spinner"></div>
+                  <span>Loading balances...</span>
+                </div>
+              ) : (
+                filteredTokens.map((token) => (
+                  <button
+                    key={`${token.address}-${token.symbol}`}
+                    className="token-option"
+                    onClick={() => handleTokenSelect(token)}
+                  >
+                    <div className="token-option-content">
+                      <span className="token-icon">
+                        {getTokenIcon(token.symbol || '').startsWith('/') ? (
+                          <Image src={getTokenIcon(token.symbol || '')} alt={token.symbol || 'Token'} width={24} height={24} />
+                        ) : (
+                          getTokenIcon(token.symbol || '')
+                        )}
+                      </span>
+                      <div className="token-details">
+                        <div className="token-symbol">{token.symbol}</div>
+                        <div className="token-name">{token.name}</div>
+                      </div>
+                      <div className="token-balance">
+                        {formatBalance(tokenBalances[token.address] || '0')}
+                      </div>
                     </div>
-                    <div className="token-balance">
-                      {formatBalance(tokenBalances[token.address] || '0')}
-                    </div>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                ))
+              )}
             </div>
 
             {filteredTokens.length === 0 && (
