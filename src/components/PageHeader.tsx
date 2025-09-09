@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FaUser, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -16,7 +15,6 @@ export const PageHeader = ({ title, subtitle, showAvatar = true }: PageHeaderPro
   const { user, logout, refreshUser } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     // Refresh user data when component mounts
@@ -43,7 +41,7 @@ export const PageHeader = ({ title, subtitle, showAvatar = true }: PageHeaderPro
   const handleSignOut = () => {
     logout();
     setShowUserMenu(false);
-    router.push('/');
+    // Don't redirect here - let the AuthContext handle it
   };
 
   const toggleUserMenu = () => {

@@ -22,7 +22,11 @@ export const AuthGuard = ({
 
   useEffect(() => {
     if (!isLoading && requireAuth && !isAuthenticated) {
-      router.push(redirectTo);
+      // Add a small delay to prevent race conditions
+      const timer = setTimeout(() => {
+        router.replace(redirectTo);
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [isLoading, isAuthenticated, requireAuth, redirectTo, router]);
 

@@ -91,8 +91,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = () => {
+    console.log('Logging out user...');
     setUser(null);
     localStorage.removeItem('pool_user');
+    // Force a page reload to clear any cached state
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   };
 
   const refreshUser = async () => {

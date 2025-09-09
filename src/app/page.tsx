@@ -12,9 +12,13 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to dashboard if already authenticated
-    if (isAuthenticated && !isLoading) {
-      router.push('/dashboard');
+    // Only redirect to dashboard if user is authenticated and not on the landing page
+    if (isAuthenticated && !isLoading && typeof window !== 'undefined' && window.location.pathname === '/') {
+      // Add a small delay to show the landing page briefly
+      const timer = setTimeout(() => {
+        router.replace('/dashboard');
+      }, 1000);
+      return () => clearTimeout(timer);
     }
   }, [isAuthenticated, isLoading, router]);
 

@@ -34,6 +34,7 @@ class PortfolioService {
   private provider: ethers.JsonRpcProvider | null = null;
   private cache: Map<string, { data: PortfolioSummary; timestamp: number }> = new Map();
   private readonly CACHE_DURATION = 2 * 60 * 1000; // 2 minutes to match price API cache
+  private loadingPromises: Map<string, Promise<PortfolioSummary>> = new Map(); // Prevent multiple simultaneous calls
 
   constructor() {
     this.initializeProvider();
@@ -85,6 +86,11 @@ class PortfolioService {
       return cached.data;
     }
 
+    // Check if there's already a loading promise for this user
+    if (this.loadingPromises.has(cacheKey)) {
+      return this.loadingPromises.get(cacheKey)!;
+    }
+
     if (!this.provider) {
       console.warn('Provider not initialized, returning empty portfolio');
       return {
@@ -94,6 +100,20 @@ class PortfolioService {
       };
     }
 
+    // Create a loading promise to prevent multiple simultaneous calls
+    const loadingPromise = this.fetchPortfolioData(userAddress, cacheKey);
+    this.loadingPromises.set(cacheKey, loadingPromise);
+
+    try {
+      const result = await loadingPromise;
+      return result;
+    } finally {
+      // Clean up the loading promise
+      this.loadingPromises.delete(cacheKey);
+    }
+  }
+
+  private async fetchPortfolioData(userAddress: string, cacheKey: string): Promise<PortfolioSummary> {
     try {
       const tokenBalances: TokenBalance[] = [];
       let totalValueUSD = 0;

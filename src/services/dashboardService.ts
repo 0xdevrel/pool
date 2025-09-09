@@ -66,55 +66,59 @@ export class DashboardService {
 
   private async fetchWLDPriceDataFromCoinDesk(): Promise<WLDPriceData> {
     try {
-      const coinDeskApiKey = process.env.COINDESK_API_KEY;
+      // Try environment variable first, then fallback to hardcoded key
+      const coinDeskApiKey = process.env.COINDESK_API_KEY || 'b1e5a8060ca8f624a1e73dd9c0760709211f5a7a6efd0ae33042a51de3e4437f';
+      console.log('CoinDesk API key available:', !!coinDeskApiKey);
+      
       if (!coinDeskApiKey) {
         console.warn('CoinDesk API key not found, falling back to CoinGecko');
         return this.fetchWLDPriceData();
       }
 
-      // Fetch Bitcoin data from CoinDesk for market context
-      const coinDeskResponse = await fetch(`https://api.coindesk.com/v1/bpi/currentprice.json?apiKey=${coinDeskApiKey}`, {
+      // Fetch WLD data from CoinDesk data API
+      const coinDeskResponse = await fetch(`https://data-api.coindesk.com/spot/v1/latest/tick?market=coinbase&instruments=WLD-USD&api_key=${coinDeskApiKey}`, {
         headers: {
           'Accept': 'application/json',
+          'Content-type': 'application/json; charset=UTF-8',
         },
       });
 
       if (!coinDeskResponse.ok) {
+        console.error(`CoinDesk API error: ${coinDeskResponse.status}`, await coinDeskResponse.text());
         throw new Error(`CoinDesk API error: ${coinDeskResponse.status}`);
       }
 
       const coinDeskData = await coinDeskResponse.json();
-      console.log('CoinDesk API response:', coinDeskData);
+      console.log('CoinDesk Data API response:', coinDeskData);
       
-      // Fetch WLD-specific data from CoinGecko
-      const coinGeckoResponse = await fetch('https://api.coingecko.com/api/v3/coins/worldcoin-wld');
-      const coinGeckoData = await coinGeckoResponse.json();
-      
-      // Use CoinDesk for general market context and CoinGecko for WLD-specific data
-      const btcPrice = coinDeskData.bpi?.USD?.rate_float || 0;
-      const wldPrice = coinGeckoData.market_data?.current_price?.usd || 1.5;
-      
-      console.log('Using CoinDesk for market context, CoinGecko for WLD data');
-      console.log('BTC Price (CoinDesk):', btcPrice);
-      console.log('WLD Price (CoinGecko):', wldPrice);
-      
-      // Validate WLD price - should be around $1.5-2.5
-      const validatedPrice = (wldPrice >= 0.5 && wldPrice <= 5.0) ? wldPrice : 1.9;
-      if (wldPrice !== validatedPrice) {
-        console.log(`Dashboard: Fixed WLD price from ${wldPrice} to ${validatedPrice}`);
+      if (!coinDeskData.Data || !coinDeskData.Data['WLD-USD']) {
+        console.error('No WLD data in CoinDesk response:', coinDeskData);
+        throw new Error('No WLD data in CoinDesk response');
       }
+
+      const wldData = coinDeskData.Data['WLD-USD'];
+      const wldPrice = wldData.PRICE || 1.9;
+      
+      console.log('Using CoinDesk Data API for WLD data');
+      console.log('WLD Price (CoinDesk):', wldPrice);
+      console.log('24h Change:', wldData.CURRENT_DAY_CHANGE_PERCENTAGE, '%');
+      console.log('24h Volume:', wldData.CURRENT_DAY_QUOTE_VOLUME);
+      
+      // Calculate market cap (approximate)
+      const circulatingSupply = 2020000000; // Approximate circulating supply
+      const marketCap = wldPrice * circulatingSupply;
       
       return {
-        price: validatedPrice,
-        marketCap: coinGeckoData.market_data?.market_cap?.usd || 0,
-        volume24h: coinGeckoData.market_data?.total_volume?.usd || 0,
-        priceChange24h: coinGeckoData.market_data?.price_change_percentage_24h || 0,
-        priceChange7d: coinGeckoData.market_data?.price_change_percentage_7d || 0,
-        marketCapRank: coinGeckoData.market_cap_rank || 38,
-        volumeRank: coinGeckoData.market_data?.total_volume?.usd_24h_rank || 6,
-        circulatingSupply: coinGeckoData.market_data?.circulating_supply || 2020000000,
-        totalSupply: coinGeckoData.market_data?.total_supply || 10000000000,
-        maxSupply: coinGeckoData.market_data?.max_supply || null,
+        price: wldPrice,
+        marketCap: marketCap,
+        volume24h: wldData.CURRENT_DAY_QUOTE_VOLUME || 0,
+        priceChange24h: wldData.CURRENT_DAY_CHANGE_PERCENTAGE || 0,
+        priceChange7d: wldData.MOVING_7_DAY_CHANGE_PERCENTAGE || 0,
+        marketCapRank: 34, // From your image showing #34
+        volumeRank: 6,
+        circulatingSupply: circulatingSupply,
+        totalSupply: 10000000000,
+        maxSupply: null,
         lastUpdated: new Date()
       };
     } catch (error) {
@@ -209,11 +213,12 @@ export class DashboardService {
 
   private async fetchChartData(): Promise<Array<{ timestamp: number; price: number }>> {
     try {
-      // Fetch 7-day price history from CoinGecko (CoinDesk doesn't have historical data for WLD)
+      // For now, use CoinGecko for historical data since CoinDesk data API doesn't provide historical data
+      // In the future, we could implement a solution that stores daily prices from CoinDesk
       const response = await fetch('https://api.coingecko.com/api/v3/coins/worldcoin-wld/market_chart?vs_currency=usd&days=7&interval=daily');
       const data = await response.json();
       
-      console.log('Chart data fetched from CoinGecko');
+      console.log('Chart data fetched from CoinGecko (historical data)');
       return data.prices.map(([timestamp, price]: [number, number]) => ({
         timestamp,
         price

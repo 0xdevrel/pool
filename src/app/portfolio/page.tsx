@@ -32,11 +32,17 @@ export default function PortfolioPage() {
     }
   }, [user?.walletAddress]);
 
+  // Add debounce to prevent rapid re-renders
   useEffect(() => {
-    if (user?.walletAddress) {
+    if (!user?.walletAddress) return;
+    
+    const timer = setTimeout(() => {
       loadPortfolio();
-    }
-  }, [user, loadPortfolio]);
+    }, 300); // 300ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [user?.walletAddress, loadPortfolio]);
+
 
   const formatUSD = (value: number) => {
     return new Intl.NumberFormat('en-US', {
