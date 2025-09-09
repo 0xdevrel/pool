@@ -207,7 +207,7 @@ export default function DashboardPage() {
                   <div className="price-subtitle">
                     <span>7d: {formatPercentage(metrics.wld.priceChange7d)}</span>
                     <span>•</span>
-                    <span>Updated {metrics.wld.lastUpdated.toLocaleTimeString()}</span>
+                    <span>Updated {metrics.wld.lastUpdated ? new Date(metrics.wld.lastUpdated).toLocaleTimeString() : 'Just now'}</span>
                   </div>
                 </div>
               )}
