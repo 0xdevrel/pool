@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Token } from "@uniswap/sdk-core";
 import { SwapInput } from "./SwapInput";
-import { swapService } from "@/services/swapService";
+import { limitOrderService, LimitOrder } from "@/services/limitOrderService";
+import { quoterService } from "@/services/quoterService";
 import { AVAILABLE_TOKENS } from "@/constants/tokens";
-import { FaExchangeAlt, FaCalendarAlt } from "react-icons/fa";
+import { FaExchangeAlt, FaCalendarAlt, FaTimes } from "react-icons/fa";
 
 interface LimitOrderInterfaceProps {
   className?: string;
@@ -17,22 +18,55 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
   const [tokenOut, setTokenOut] = useState<Token | null>(null);
   const [amountIn, setAmountIn] = useState<string>("");
   const [limitPrice, setLimitPrice] = useState<string>("");
-  const [expiry, setExpiry] = useState<number>(7); // days
+  const [expiry, setExpiry] = useState<string>('1week'); // days
   const [creating, setCreating] = useState(false);
+  const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+  const [orders, setOrders] = useState<LimitOrder[]>([]);
+  const [priceType, setPriceType] = useState<'market' | '+1%' | '+5%' | '+10%' | 'custom'>('+10%');
 
   const expiryOptions = [
-    { label: "1 day", value: 1 },
-    { label: "1 week", value: 7 },
-    { label: "1 month", value: 30 },
-    { label: "1 year", value: 365 }
+    { label: "1 day", value: "1day" },
+    { label: "1 week", value: "1week" },
+    { label: "1 month", value: "1month" },
+    { label: "1 year", value: "1year" }
   ];
 
   const priceSuggestions = [
-    { label: "Market", value: 0 },
-    { label: "+1%", value: 1.01 },
-    { label: "+5%", value: 1.05 },
-    { label: "+10%", value: 1.10 }
+    { label: "Market", value: "market" },
+    { label: "+1%", value: "+1%" },
+    { label: "+5%", value: "+5%" },
+    { label: "+10%", value: "+10%" }
   ];
+
+  const fetchCurrentPrice = useCallback(async () => {
+    if (!tokenIn || !tokenOut) return;
+    
+    try {
+      const price = await quoterService.getMarketPrice(tokenIn, tokenOut);
+      setCurrentPrice(price);
+      
+      // Auto-calculate limit price based on selection
+      if (priceType !== 'custom' && price > 0) {
+        const multipliers = {
+          'market': 1,
+          '+1%': 1.01,
+          '+5%': 1.05,
+          '+10%': 1.10
+        };
+        setLimitPrice((price * multipliers[priceType]).toFixed(6));
+      }
+    } catch (error) {
+      console.error('Failed to fetch price:', error);
+      setCurrentPrice(null);
+      alert(`Failed to fetch current price: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }, [tokenIn, tokenOut, priceType]);
+
+  // Load existing orders and fetch current price
+  useEffect(() => {
+    setOrders(limitOrderService.getOrders());
+    fetchCurrentPrice();
+  }, [tokenIn, tokenOut, fetchCurrentPrice]);
 
   const popularPairs = [
     { tokenIn: AVAILABLE_TOKENS[0], tokenOut: AVAILABLE_TOKENS[1] }, // ETH/USDC
@@ -56,24 +90,35 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
 
     setCreating(true);
     try {
-      const orderId = await swapService.createLimitOrder({
+      const order = await limitOrderService.createLimitOrder({
         tokenIn,
         tokenOut,
         amountIn,
-        limitPrice,
-        expiry: Math.floor(Date.now() / 1000) + (expiry * 24 * 60 * 60),
+        targetPrice: parseFloat(limitPrice),
+        priceType,
+        expiry: (expiry as '1day' | '1week' | '1month' | '1year') || '1week'
       });
 
-      alert(`Limit order created successfully! Order ID: ${orderId}`);
+      alert(`Limit order created successfully! Order ID: ${order.id}`);
+      
+      // Update orders list
+      setOrders(limitOrderService.getOrders());
       
       // Reset form
       setAmountIn("");
       setLimitPrice("");
     } catch (error) {
       console.error('Error creating limit order:', error);
-      alert('Failed to create limit order. Please try again.');
+      alert(`Failed to create limit order: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleCancelOrder = (orderId: string) => {
+    if (limitOrderService.cancelOrder(orderId)) {
+      setOrders(limitOrderService.getOrders());
+      alert('Order cancelled');
     }
   };
 
@@ -151,15 +196,19 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
               {priceSuggestions.map((suggestion) => (
                 <button
                   key={suggestion.label}
-                  className={`price-suggestion-button ${limitPrice === suggestion.value.toString() ? 'active' : ''}`}
+                  className={`price-suggestion-button ${priceType === suggestion.value ? 'active' : ''}`}
                   onClick={() => {
-                    if (suggestion.value === 0) {
-                      // Market price - you could fetch current price here
-                      setLimitPrice("0");
-                    } else {
-                      // Apply percentage to current market price
-                      // For now, just set the multiplier
-                      setLimitPrice(suggestion.value.toString());
+                    setPriceType(suggestion.value as 'market' | '+1%' | '+5%' | '+10%' | 'custom');
+                    if (suggestion.value === 'market') {
+                      setLimitPrice(currentPrice?.toString() || "0");
+                    } else if (currentPrice && suggestion.value !== 'custom') {
+                      const multipliers = {
+                        'market': 1,
+                        '+1%': 1.01,
+                        '+5%': 1.05,
+                        '+10%': 1.10
+                      };
+                      setLimitPrice((currentPrice * multipliers[suggestion.value as keyof typeof multipliers]).toFixed(6));
                     }
                   }}
                 >
@@ -182,7 +231,7 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
               <button
                 key={option.value}
                 className={`expiry-button ${expiry === option.value ? 'active' : ''}`}
-                onClick={() => setExpiry(option.value)}
+                onClick={() => setExpiry(option.value as '1day' | '1week' | '1month' | '1year')}
               >
                 {option.label}
               </button>
@@ -190,6 +239,12 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
           </div>
         </div>
       </div>
+
+      {currentPrice && tokenIn && tokenOut && (
+        <div className="current-price-display">
+          <span>Current Price: {currentPrice.toFixed(6)} {tokenOut.symbol} per {tokenIn.symbol}</span>
+        </div>
+      )}
 
       {tokenIn && tokenOut && amountIn && limitPrice && (
         <div className="limit-order-details">
@@ -203,7 +258,7 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
           </div>
           <div className="detail-row">
             <span>Expires</span>
-            <span>{expiry} days from now</span>
+            <span>{expiryOptions.find(opt => opt.value === expiry)?.label || '1 week'} from now</span>
           </div>
         </div>
       )}
@@ -230,6 +285,35 @@ export const LimitOrderInterface = ({ className = "", userAddress }: LimitOrderI
           )}
         </button>
       </div>
+
+      {/* Active Orders */}
+      {orders.filter(o => o.status === 'pending').length > 0 && (
+        <div className="active-orders">
+          <h3>Active Orders</h3>
+          <div className="orders-list">
+            {orders.filter(o => o.status === 'pending').map(order => (
+              <div key={order.id} className="order-card">
+                <div className="order-info">
+                  <div className="order-pair">{order.pair}</div>
+                  <div className="order-details">
+                    <span>Sell {parseFloat(order.amountIn).toFixed(4)} {order.tokenIn.symbol}</span>
+                    <span>at {order.targetPrice.toFixed(6)} {order.tokenOut.symbol}</span>
+                  </div>
+                  <div className="order-expiry">
+                    Expires: {new Date(order.expiry).toLocaleDateString()}
+                  </div>
+                </div>
+                <button 
+                  className="cancel-order-button"
+                  onClick={() => handleCancelOrder(order.id)}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,10 +1,42 @@
 import { Token } from '@uniswap/sdk-core';
 import { POOL_CONFIGS, WORLD_CHAIN_CONTRACTS } from '@/constants/tokens';
 import { portfolioService } from './portfolioService';
+import { quoterService } from './quoterService';
+import { encodeAbiParameters, parseUnits } from 'viem';
 
-// Contract addresses for future real implementation
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _contracts = WORLD_CHAIN_CONTRACTS;
+// V4 Universal Router Commands
+const Commands = {
+  V4_SWAP: 0x10
+} as const;
+
+// V4 Actions
+const Actions = {
+  SWAP_EXACT_IN_SINGLE: 0x00,
+  SWAP_EXACT_IN: 0x01,
+  SWAP_EXACT_OUT_SINGLE: 0x02,
+  SWAP_EXACT_OUT: 0x03,
+  SETTLE: 0x10,
+  SETTLE_ALL: 0x11,
+  SETTLE_PAIR: 0x12,
+  TAKE: 0x13,
+  TAKE_ALL: 0x14,
+  TAKE_PAIR: 0x15
+} as const;
+
+// Universal Router ABI
+const UNIVERSAL_ROUTER_ABI = [
+  {
+    name: 'execute',
+    type: 'function',
+    inputs: [
+      { name: 'commands', type: 'bytes' },
+      { name: 'inputs', type: 'bytes[]' },
+      { name: 'deadline', type: 'uint256' }
+    ],
+    outputs: [{ name: 'outputs', type: 'bytes[]' }],
+    stateMutability: 'payable'
+  }
+] as const;
 
 export interface SwapQuote {
   amountOut: string;
@@ -54,15 +86,25 @@ export class SwapService {
     }
 
     try {
-      // Find the appropriate pool configuration
-      const poolConfig = this.findPoolConfig(params.tokenIn, params.tokenOut);
-      if (!poolConfig) {
-        throw new Error('No pool found for this token pair');
+      // Use the new quoter service
+      const quoteResult = await quoterService.getQuote({
+        tokenIn: params.tokenIn,
+        tokenOut: params.tokenOut,
+        amountIn: params.amountIn
+      });
+
+      if (!quoteResult || !quoteResult.amountOut) {
+        throw new Error('No quote available for this token pair');
       }
 
-      // For now, return mock quote data
-      // In production, this would call the actual Quoter contract
-      const quote = await this.getMockQuote(params, poolConfig);
+      // Convert to SwapQuote format
+      const quote: SwapQuote = {
+        amountOut: quoteResult.amountOut,
+        priceImpact: quoteResult.priceImpact || 0,
+        minimumReceived: this.calculateMinimumReceived(quoteResult.amountOut, params.slippageTolerance),
+        fee: this.calculateFee(params.amountIn),
+        route: quoteResult.route || [params.tokenIn.symbol || '', params.tokenOut.symbol || '']
+      };
       
       // Cache the result
       this.cache.set(cacheKey, quote);
@@ -75,6 +117,22 @@ export class SwapService {
     }
   }
 
+  // Calculate minimum received amount with slippage
+  private calculateMinimumReceived(amountOut: string, slippageTolerance: number): string {
+    const amountOutNum = parseFloat(amountOut);
+    const slippageMultiplier = 1 - (slippageTolerance / 100);
+    return (amountOutNum * slippageMultiplier).toString();
+  }
+
+  // Calculate fee for the swap
+  private calculateFee(amountIn: string): string {
+    const amountInNum = parseFloat(amountIn);
+    // Standard Uniswap V4 fee is 0.3% (3000 basis points)
+    const feeRate = 0.003;
+    return (amountInNum * feeRate).toString();
+  }
+
+
   // Find pool configuration for token pair
   private findPoolConfig(tokenIn: Token, tokenOut: Token): typeof POOL_CONFIGS[0] | null {
     return POOL_CONFIGS.find(config => 
@@ -83,65 +141,197 @@ export class SwapService {
     ) || null;
   }
 
-  // Mock quote generation (replace with actual Quoter contract call)
-  private async getMockQuote(params: SwapParams, poolConfig: typeof POOL_CONFIGS[0]): Promise<SwapQuote> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const amountInNum = parseFloat(params.amountIn);
+  // V4-specific methods
+  private createPoolKey(tokenIn: Token, tokenOut: Token): {
+    currency0: `0x${string}`;
+    currency1: `0x${string}`;
+    fee: number;
+    tickSpacing: number;
+    hooks: `0x${string}`;
+  } {
+    const [currency0, currency1] = this.sortTokens(tokenIn.address, tokenOut.address);
+    const poolConfig = this.findPoolConfig(tokenIn, tokenOut);
+    const fee = poolConfig?.fee || 3000;
     
-    // Mock price calculation (in production, this would come from the Quoter contract)
-    let priceRatio = 1;
-    if (params.tokenIn.symbol === 'WETH' && params.tokenOut.symbol === 'USDC') {
-      priceRatio = 3668.69; // ETH price
-    } else if (params.tokenIn.symbol === 'WLD' && params.tokenOut.symbol === 'USDC') {
-      priceRatio = 0.986; // WLD price
-    } else if (params.tokenIn.symbol === 'WETH' && params.tokenOut.symbol === 'WLD') {
-      priceRatio = 3720; // ETH to WLD ratio
-    } else if (params.tokenIn.symbol === 'USDC' && params.tokenOut.symbol === 'WETH') {
-      priceRatio = 1 / 3668.69;
-    } else if (params.tokenIn.symbol === 'USDC' && params.tokenOut.symbol === 'WLD') {
-      priceRatio = 1 / 0.986;
-    } else if (params.tokenIn.symbol === 'WLD' && params.tokenOut.symbol === 'WETH') {
-      priceRatio = 1 / 3720;
-    }
-
-    const amountOut = amountInNum * priceRatio;
-    const fee = amountInNum * (poolConfig.fee / 1000000); // Convert fee to decimal
-    const minimumReceived = amountOut * (1 - params.slippageTolerance / 100);
-    const priceImpact = Math.random() * 0.5; // Mock price impact
-
     return {
-      amountOut: amountOut.toString(),
-      priceImpact,
-      minimumReceived: minimumReceived.toString(),
-      fee: fee.toString(),
-      route: [params.tokenIn.symbol || '', params.tokenOut.symbol || ''],
+      currency0: currency0 as `0x${string}`,
+      currency1: currency1 as `0x${string}`,
+      fee,
+      tickSpacing: this.getTickSpacing(fee),
+      hooks: '0x0000000000000000000000000000000000000000' as `0x${string}`
     };
   }
 
-  // Execute swap (mock implementation)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private sortTokens(tokenA: string, tokenB: string): [string, string] {
+    return tokenA.toLowerCase() < tokenB.toLowerCase() 
+      ? [tokenA, tokenB] 
+      : [tokenB, tokenA];
+  }
+
+  private getTickSpacing(fee: number): number {
+    switch(fee) {
+      case 100: return 1;
+      case 500: return 10;
+      case 3000: return 60;
+      case 10000: return 200;
+      default: return 60;
+    }
+  }
+
+  private encodeSwapExactInSingle(params: {
+    poolKey: {
+      currency0: `0x${string}`;
+      currency1: `0x${string}`;
+      fee: number;
+      tickSpacing: number;
+      hooks: `0x${string}`;
+    };
+    zeroForOne: boolean;
+    amountIn: bigint;
+    amountOutMinimum: bigint;
+    sqrtPriceLimitX96: bigint;
+    hookData: `0x${string}`;
+  }): `0x${string}` {
+    return encodeAbiParameters(
+      [{
+        components: [
+          {
+            components: [
+              { name: 'currency0', type: 'address' },
+              { name: 'currency1', type: 'address' },
+              { name: 'fee', type: 'uint24' },
+              { name: 'tickSpacing', type: 'int24' },
+              { name: 'hooks', type: 'address' }
+            ],
+            name: 'poolKey',
+            type: 'tuple'
+          },
+          { name: 'zeroForOne', type: 'bool' },
+          { name: 'amountIn', type: 'uint128' },
+          { name: 'amountOutMinimum', type: 'uint128' },
+          { name: 'sqrtPriceLimitX96', type: 'uint160' },
+          { name: 'hookData', type: 'bytes' }
+        ],
+        type: 'tuple'
+      }],
+      [params]
+    );
+  }
+
+
+  // Execute swap using V4 Universal Router via MiniKit
   async executeSwap(params: SwapParams, quote: SwapQuote): Promise<string> {
     try {
-      // In production, this would:
-      // 1. Check token approvals
-      // 2. Construct Universal Router transaction
-      // 3. Execute the swap
-      // 4. Return transaction hash
+      // Check if MiniKit is available
+      if (typeof window === 'undefined' || !window.MiniKit) {
+        throw new Error('MiniKit not available');
+      }
 
-      // Simulate transaction execution
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const { MiniKit } = window as { MiniKit: { user?: { walletAddress?: string }; sendTransaction?: (params: unknown) => Promise<unknown> } };
+
+      // Check if user is connected
+      if (!MiniKit.user?.walletAddress) {
+        throw new Error('User not connected');
+      }
+
+      // Create V4 pool key
+      const poolKey = this.createPoolKey(params.tokenIn, params.tokenOut);
       
-      // Mock transaction hash
-      const txHash = '0x' + Math.random().toString(16).substr(2, 64);
+      // Encode V4 swap command
+      const commands = `0x${Commands.V4_SWAP.toString(16).padStart(2, '0')}` as `0x${string}`;
+      
+      // Encode actions for V4 swap
+      const actions = `0x${Actions.SWAP_EXACT_IN_SINGLE.toString(16).padStart(2, '0')}${Actions.SETTLE_ALL.toString(16).padStart(2, '0')}${Actions.TAKE_ALL.toString(16).padStart(2, '0')}` as `0x${string}`;
+      
+      // Parse amountIn safely - handle both decimal strings and raw integer strings
+      let amountInBigInt: bigint;
+      try {
+        amountInBigInt = parseUnits(params.amountIn, params.tokenIn.decimals);
+      } catch (e) {
+        console.warn('Failed to parse amountIn as decimal string in swap execution, attempting raw BigInt conversion:', params.amountIn, e);
+        try {
+          amountInBigInt = BigInt(params.amountIn);
+        } catch (e2) {
+          console.error('Failed to parse amountIn in swap execution, defaulting to 0n:', params.amountIn, e2);
+          amountInBigInt = BigInt(0);
+        }
+      }
+
+      // Parse minimum received amount safely
+      let minAmountOutBigInt: bigint;
+      try {
+        minAmountOutBigInt = parseUnits(quote.minimumReceived, params.tokenOut.decimals);
+      } catch (e) {
+        console.warn('Failed to parse minimumReceived as decimal string in swap execution, attempting raw BigInt conversion:', quote.minimumReceived, e);
+        try {
+          minAmountOutBigInt = BigInt(quote.minimumReceived);
+        } catch (e2) {
+          console.error('Failed to parse minimumReceived in swap execution, defaulting to 0n:', quote.minimumReceived, e2);
+          minAmountOutBigInt = BigInt(0);
+        }
+      }
+
+      // Encode parameters for each action
+      const swapParams = this.encodeSwapExactInSingle({
+        poolKey,
+        zeroForOne: params.tokenIn.address.toLowerCase() === poolKey.currency0.toLowerCase(),
+        amountIn: amountInBigInt,
+        amountOutMinimum: minAmountOutBigInt,
+        sqrtPriceLimitX96: BigInt(0),
+        hookData: '0x' as `0x${string}`
+      });
+      
+      const settleParams = encodeAbiParameters(
+        [{ type: 'address' }, { type: 'uint256' }],
+        [poolKey.currency0, amountInBigInt]
+      );
+      
+      const takeParams = encodeAbiParameters(
+        [{ type: 'address' }, { type: 'uint256' }],
+        [poolKey.currency1, minAmountOutBigInt]
+      );
+      
+      // Combine into inputs array
+      const inputs = [
+        encodeAbiParameters(
+          [{ type: 'bytes' }, { type: 'bytes[]' }],
+          [actions, [swapParams, settleParams, takeParams]]
+        )
+      ];
+      
+      // Execute via MiniKit
+      const deadline = Math.floor(Date.now() / 1000) + 1800; // 30 minutes
+      
+      console.log('Executing V4 swap with params:', {
+        poolKey,
+        amountIn: params.amountIn,
+        amountOutMin: quote.minimumReceived,
+        commands,
+        inputs: inputs.length
+      });
+
+      const { finalPayload } = await (MiniKit as { commandsAsync: { sendTransaction: (params: unknown) => Promise<{ finalPayload: { status: string; error?: string; transaction_id: string } }> } }).commandsAsync.sendTransaction({
+        transaction: [{
+          address: WORLD_CHAIN_CONTRACTS.UNIVERSAL_ROUTER as `0x${string}`,
+          abi: UNIVERSAL_ROUTER_ABI,
+          functionName: 'execute',
+          args: [commands, inputs, deadline],
+          value: params.tokenIn.address === '0x0000000000000000000000000000000000000000' 
+            ? params.amountIn 
+            : '0'
+        }]
+      });
+      
+      if (finalPayload.status === 'error') {
+        throw new Error(finalPayload.error);
+      }
       
       // Clear cache after successful swap
       this.clearCache();
       
-      return txHash;
+      return finalPayload.transaction_id;
     } catch (error) {
-      console.error('Error executing swap:', error);
+      console.error('Error executing V4 swap:', error);
       throw error;
     }
   }

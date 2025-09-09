@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Token } from "@uniswap/sdk-core";
 import { SwapInput } from "./SwapInput";
 import { swapService, SwapQuote } from "@/services/swapService";
+import { AVAILABLE_TOKENS } from "@/constants/tokens";
 import { FaExchangeAlt, FaCog, FaInfoCircle } from "react-icons/fa";
 
 interface SwapInterfaceProps {
@@ -23,6 +24,14 @@ export const SwapInterface = ({ className = "", userAddress }: SwapInterfaceProp
   const [slippageTolerance, setSlippageTolerance] = useState(0.5);
   const [deadline, setDeadline] = useState(30);
 
+  // Popular trading pairs
+  const popularPairs = [
+    { tokenIn: AVAILABLE_TOKENS[0], tokenOut: AVAILABLE_TOKENS[2] }, // WLD/ETH
+    { tokenIn: AVAILABLE_TOKENS[0], tokenOut: AVAILABLE_TOKENS[1] }, // WLD/USDC
+    { tokenIn: AVAILABLE_TOKENS[1], tokenOut: AVAILABLE_TOKENS[0] }, // ETH/WLD
+    { tokenIn: AVAILABLE_TOKENS[1], tokenOut: AVAILABLE_TOKENS[2] }, // ETH/USDC
+  ];
+
   // Auto-fetch quote when inputs change
   useEffect(() => {
     const fetchQuote = async () => {
@@ -36,12 +45,15 @@ export const SwapInterface = ({ className = "", userAddress }: SwapInterfaceProp
             slippageTolerance,
             deadline: Math.floor(Date.now() / 1000) + (deadline * 60),
           });
+          
           setQuote(newQuote);
           setAmountOut(newQuote.amountOut);
         } catch (error) {
           console.error('Error fetching quote:', error);
           setQuote(null);
           setAmountOut("");
+          // Show error to user
+          alert(`Failed to get quote: ${error instanceof Error ? error.message : 'Unknown error'}`);
         } finally {
           setLoading(false);
         }
@@ -63,6 +75,14 @@ export const SwapInterface = ({ className = "", userAddress }: SwapInterfaceProp
     setTokenOut(tempToken);
     setAmountIn(amountOut);
     setAmountOut(tempAmount);
+  };
+
+  const handlePairSelect = (pair: { tokenIn: Token; tokenOut: Token }) => {
+    setTokenIn(pair.tokenIn);
+    setTokenOut(pair.tokenOut);
+    setAmountIn("");
+    setAmountOut("");
+    setQuote(null);
   };
 
   const handleSwap = async () => {
@@ -87,7 +107,7 @@ export const SwapInterface = ({ className = "", userAddress }: SwapInterfaceProp
       setQuote(null);
     } catch (error) {
       console.error('Error executing swap:', error);
-      alert('Swap failed. Please try again.');
+      alert(`Swap failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSwapping(false);
     }
@@ -154,6 +174,24 @@ export const SwapInterface = ({ className = "", userAddress }: SwapInterfaceProp
         </div>
       )}
 
+      {/* Popular Trading Pairs */}
+      <div className="popular-pairs">
+        <h3>Popular Pairs</h3>
+        <div className="pair-buttons">
+          {popularPairs.map((pair, index) => (
+            <button
+              key={index}
+              className="pair-button"
+              onClick={() => handlePairSelect(pair)}
+            >
+              <span className="pair-tokens">
+                {pair.tokenIn.symbol}/{pair.tokenOut.symbol}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="swap-inputs">
         <SwapInput
           label="Sell"
@@ -180,7 +218,7 @@ export const SwapInterface = ({ className = "", userAddress }: SwapInterfaceProp
           amount={amountOut}
           onTokenChange={setTokenOut}
           onAmountChange={() => {}} // Read-only for output
-          disabled={true}
+          disabled={false} // Allow token selection
           userAddress={userAddress}
         />
       </div>

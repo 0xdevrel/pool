@@ -3,7 +3,7 @@ import { WORLD_CHAIN_CONTRACTS } from '@/constants/tokens';
 
 // World Chain configuration
 export const WORLD_CHAIN_ID = 480 as ChainId;
-export const WORLD_CHAIN_RPC = process.env.NEXT_PUBLIC_WORLD_CHAIN_RPC_URL || 'https://worldchain.worldcoin.org';
+export const WORLD_CHAIN_RPC = process.env.NEXT_PUBLIC_WORLD_CHAIN_RPC_URL || 'https://worldchain-mainnet.g.alchemy.com/v2/2CX9ldRg4gG7dvN8UGFskaJjdpqo39kN';
 
 // Contract addresses for future real implementation
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
