@@ -117,8 +117,8 @@ export const PoolCard = ({ pool, onClick }: PoolCardProps) => {
           <span className="provider-count">{pool.liquidityProviderCount} providers</span>
         </div>
         <div className="pool-actions">
-          <button className="action-button secondary">View</button>
-          <button className="action-button primary">Add Liquidity</button>
+          <button className="action-button secondary" onMouseDown={(e) => e.preventDefault()}>View</button>
+          <button className="action-button primary" onMouseDown={(e) => e.preventDefault()}>Add Liquidity</button>
         </div>
       </div>
     </div>

@@ -228,11 +228,15 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <button 
-                  className="refresh-button-small"
+                  className={`refresh-button-small ${metricsLoading ? 'loading' : ''}`}
                   onClick={loadMetrics}
                   disabled={metricsLoading}
+                  title={metricsLoading ? 'Refreshing...' : 'Refresh data'}
                 >
-                  <FaSync className={metricsLoading ? 'spinning' : ''} />
+                  <FaSync className={metricsLoading ? 'spinning' : ''} style={{ 
+                    animation: metricsLoading ? 'spin 1s linear infinite' : 'none',
+                    transformOrigin: 'center'
+                  }} />
                 </button>
               </div>
               
