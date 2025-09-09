@@ -1,14 +1,10 @@
 import { Token } from '@uniswap/sdk-core';
-import { POOL_CONFIGS } from '@/constants/tokens';
+import { POOL_CONFIGS, WORLD_CHAIN_CONTRACTS } from '@/constants/tokens';
 import { portfolioService } from './portfolioService';
 
-// World Chain contract addresses (these would be the actual deployed addresses)
-export const WORLD_CHAIN_CONTRACTS = {
-  UNIVERSAL_ROUTER: '0x66a9893cc07d91d95644aedd05d03f95e1dba8af',
-  QUOTER: '0x1234567890123456789012345678901234567890',
-  PERMIT2: '0x0000000000000000000000000000000000000000',
-  POOL_MANAGER: '0x1234567890123456789012345678901234567890',
-};
+// Contract addresses for future real implementation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _contracts = WORLD_CHAIN_CONTRACTS;
 
 export interface SwapQuote {
   amountOut: string;

@@ -3,6 +3,17 @@ import { Token, ChainId } from '@uniswap/sdk-core';
 // World Chain ID from environment variable
 export const WORLD_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_WORLD_CHAIN_ID || '480') as ChainId;
 
+// World Chain Uniswap v4 contract addresses
+export const WORLD_CHAIN_CONTRACTS = {
+  POOL_MANAGER: '0xb1860d529182ac3bc1f51fa2abd56662b7d13f33',
+  POSITION_DESCRIPTOR: '0x7da419153bd420b689f312363756d76836aeace4',
+  POSITION_MANAGER: '0xc585e0f504613b5fbf874f21af14c65260fb41fa',
+  QUOTER: '0x55d235b3ff2daf7c3ede0defc9521f1d6fe6c5c0',
+  STATE_VIEW: '0x51d394718bc09297262e368c1a481217fdeb71eb',
+  UNIVERSAL_ROUTER: '0x8ac7bee993bb44dab564ea4bc9ea67bf9eb5e743',
+  PERMIT2: '0x000000000022D473030F116dDEE9F6B43aC78BA3',
+};
+
 // World Chain token addresses (real tokens available on World Chain)
 export const TOKEN_ADDRESSES = {
   ETH: '0x4200000000000000000000000000000000000006', // World Chain ETH (WETH)

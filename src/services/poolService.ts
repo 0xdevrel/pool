@@ -1,8 +1,13 @@
 import { ChainId } from '@uniswap/sdk-core';
+import { WORLD_CHAIN_CONTRACTS } from '@/constants/tokens';
 
 // World Chain configuration
 export const WORLD_CHAIN_ID = 480 as ChainId;
 export const WORLD_CHAIN_RPC = 'https://worldchain.worldcoin.org';
+
+// Contract addresses for future real implementation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _contracts = WORLD_CHAIN_CONTRACTS;
 
 // Pool data interface for World Chain liquidity pools
 export interface PoolData {
